@@ -1,0 +1,2716 @@
+/* ==========================================
+   1. Material Design 3 토큰 정의
+   ========================================== */
+:root {
+  --md-sys-color-primary: #005fb0;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #d6e4ff;
+  --md-sys-color-on-primary-container: #001b3d;
+  --md-sys-color-secondary: #475569;
+  --md-sys-color-secondary-container: #e2e8f0;
+  --md-sys-color-on-secondary-container: #0f172a;
+  --md-sys-color-tertiary: #047857;
+  --md-sys-color-tertiary-container: #a7f3d0;
+  --md-sys-color-on-tertiary-container: #022c22;
+  --md-sys-color-error: #b91c1c;
+  --md-sys-color-error-container: #fee2e2;
+  --md-sys-color-background: #f8fafc;
+  --md-sys-color-on-background: #020617;
+  --md-sys-color-surface: #ffffff;
+  --md-sys-color-on-surface: #020617;
+  --md-sys-color-surface-container: #ffffff;
+  --md-sys-color-surface-container-high: #f1f5f9;
+
+  --md-sys-color-outline: #475569;
+  --md-sys-color-outline-variant: #cbd5e1;
+  --card-border-color: #cbd5e1;
+  --cal-cell-border: #cbd5e1;
+
+  --md-shape-corner-small: 8px;
+  --md-shape-corner-medium: 12px;
+  --md-shape-corner-large: 16px;
+  --md-shape-corner-extra-large: 24px;
+  --md-shape-corner-sheet: 28px;
+  --md-shape-corner-full: 9999px;
+
+  --md-elevation-1: 0 1px 3px 0 rgba(15, 23, 42, 0.08), 0 1px 2px -1px rgba(15, 23, 42, 0.08);
+  --md-elevation-2: 0 4px 6px -1px rgba(15, 23, 42, 0.10), 0 2px 4px -2px rgba(15, 23, 42, 0.10);
+  --md-elevation-3: 0 10px 15px -3px rgba(15, 23, 42, 0.12), 0 4px 6px -4px rgba(15, 23, 42, 0.12);
+}
+
+[data-theme="dark"] {
+  --md-sys-color-primary: #9ecafe;
+  --md-sys-color-on-primary: #003258;
+  --md-sys-color-primary-container: #00497d;
+  --md-sys-color-on-primary-container: #d1e4ff;
+  --md-sys-color-secondary: #cbd5e1;
+  --md-sys-color-secondary-container: #1e293b;
+  --md-sys-color-on-secondary-container: #f8fafc;
+  --md-sys-color-tertiary: #6ee7b7;
+  --md-sys-color-tertiary-container: #064e3b;
+  --md-sys-color-on-tertiary-container: #ecfdf5;
+  --md-sys-color-error: #fca5a5;
+  --md-sys-color-error-container: #7f1d1d;
+  --md-sys-color-background: #090d16;
+  --md-sys-color-on-background: #ffffff;
+  --md-sys-color-surface: #111722;
+  --md-sys-color-on-surface: #ffffff;
+  --md-sys-color-surface-container: #111722;
+  --md-sys-color-surface-container-high: #1c2433;
+
+  --md-sys-color-outline: #94a3b8;
+  --md-sys-color-outline-variant: #334155;
+  --card-border-color: #2a374a;
+  --cal-cell-border: #2a374a;
+
+  --md-elevation-1: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+  --md-elevation-2: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
+  --md-elevation-3: 0 10px 18px 0 rgba(0, 0, 0, 0.65);
+}
+
+/* 자동 모드일 때 OS 다크모드 활성화 시에만 적용 */
+@media (prefers-color-scheme: dark) {
+  [data-theme="auto"] {
+    --md-sys-color-primary: #9ecafe;
+    --md-sys-color-on-primary: #003258;
+    --md-sys-color-primary-container: #00497d;
+    --md-sys-color-on-primary-container: #d1e4ff;
+    --md-sys-color-secondary: #cbd5e1;
+    --md-sys-color-secondary-container: #1e293b;
+    --md-sys-color-on-secondary-container: #f8fafc;
+    --md-sys-color-tertiary: #6ee7b7;
+    --md-sys-color-tertiary-container: #064e3b;
+    --md-sys-color-on-tertiary-container: #ecfdf5;
+    --md-sys-color-error: #ffb4ab;
+    --md-sys-color-error-container: #7f1d1d;
+    --md-sys-color-background: #090d16;
+    --md-sys-color-on-background: #ffffff;
+    --md-sys-color-surface: #111722;
+    --md-sys-color-on-surface: #ffffff;
+    --md-sys-color-surface-container: #111722;
+    --md-sys-color-surface-container-high: #1c2433;
+
+    --md-sys-color-outline: #94a3b8;
+    --md-sys-color-outline-variant: #334155;
+    --card-border-color: #2a374a;
+    --cal-cell-border: #2a374a;
+
+    --md-elevation-1: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+    --md-elevation-2: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
+    --md-elevation-3: 0 10px 18px 0 rgba(0, 0, 0, 0.65);
+  }
+
+  [data-theme="auto"] .time-input-inline::-webkit-calendar-picker-indicator {
+    filter: invert(0.8);
+  }
+
+  [data-theme="auto"] .cal-cell.holiday {
+    background-color: #450a0a;
+    border-color: #991b1b;
+  }
+  [data-theme="auto"] .cal-cell.holiday .cal-date-num { color: #fca5a5; }
+  [data-theme="auto"] .cal-cell.holiday .cal-sub-label {
+    color: #fecaca;
+    background: rgba(239, 68, 68, 0.4);
+  }
+
+  [data-theme="auto"] .cal-cell.leave-rec {
+    background-color: #064e3b;
+    border-color: #059669;
+  }
+  [data-theme="auto"] .cal-cell.leave-rec .cal-date-num { color: #6ee7b7; }
+  [data-theme="auto"] .cal-cell.leave-rec .cal-sub-label {
+    color: #a7f3d0;
+    background: rgba(16, 185, 129, 0.4);
+  }
+
+  [data-theme="auto"] .cal-cell.my-leave {
+    background-color: #3b0764;
+    border-color: #a855f7;
+  }
+  [data-theme="auto"] .cal-cell.my-leave .cal-date-num { color: #d8b4fe; }
+  [data-theme="auto"] .cal-cell.my-leave .cal-sub-label {
+    color: #f3e8ff;
+    background: rgba(168, 85, 247, 0.45);
+  }
+
+  [data-theme="auto"] .cal-cell.today {
+    background-color: #0c2a4a;
+    border-color: var(--md-sys-color-primary);
+    box-shadow: inset 0 0 0 1px var(--md-sys-color-primary);
+  }
+}
+
+/* ==========================================
+   2. 전역 스타일 & 로딩 화면
+   ========================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: var(--md-sys-color-background);
+  color: var(--md-sys-color-on-background);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 84px 16px 80px;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* 🌟 초기 로딩 중 스크롤 및 터치 잠금 */
+body.is-loading {
+  overflow: hidden !important;
+  touch-action: none;
+}
+
+.app-loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background-color: var(--md-sys-color-background);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
+.app-loading-screen.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loading-spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid var(--card-border-color);
+  border-top-color: var(--md-sys-color-primary);
+  border-radius: 50%;
+  animation: spinLoading 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes spinLoading {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--md-sys-color-outline);
+}
+
+.app-top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1100;
+  background-color: var(--md-sys-color-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1.5px solid var(--card-border-color);
+  box-shadow: var(--md-elevation-1);
+  display: flex;
+  justify-content: center;
+  padding: 10px 16px;
+}
+
+.top-bar-inner {
+  width: 100%;
+  max-width: 1160px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.top-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.top-bar-title-wrap {
+  flex: 1;
+  text-align: left;
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.brand-title {
+  font-size: 1.25rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: var(--md-sys-color-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  max-width: 100%;
+}
+
+.brand-title.has-marquee {
+  text-overflow: clip;
+}
+
+.brand-title-text {
+  display: inline-block;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+.brand-title-text.is-marquee {
+  animation: brandTitleMarquee 4.5s ease-in-out infinite alternate;
+}
+
+@keyframes brandTitleMarquee {
+  0%, 20% {
+    transform: translateX(0);
+  }
+  80%, 100% {
+    transform: translateX(var(--title-marquee-dist, -24px));
+  }
+}
+
+.brand-subtitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--md-sys-color-outline);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 🌟 조그마하고 깔끔한 루팡 중 인디케이터 배지 */
+.top-bar-slack-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--md-shape-corner-full);
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.12), rgba(2, 132, 199, 0.24));
+  border: 1.2px solid #0284c7;
+  color: #0284c7;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), opacity 0.25s ease, background-color 0.2s;
+  user-select: none;
+  box-shadow: 0 1px 6px rgba(2, 132, 199, 0.15);
+}
+
+[data-theme="dark"] .top-bar-slack-indicator {
+  color: #38bdf8;
+  border-color: #38bdf8;
+  background: rgba(2, 132, 199, 0.25);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+}
+
+.top-bar-slack-indicator:hover {
+  transform: scale(1.04);
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.22), rgba(2, 132, 199, 0.36));
+}
+
+.top-bar-slack-indicator.is-hidden {
+  display: none !important;
+}
+
+.slack-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #0284c7;
+  box-shadow: 0 0 0 rgba(2, 132, 199, 0.7);
+  animation: pulseDotAnim 1.6s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+[data-theme="dark"] .slack-pulse-dot {
+  background-color: #38bdf8;
+}
+
+@keyframes pulseDotAnim {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.7); }
+  70% { transform: scale(1.15); box-shadow: 0 0 0 5px rgba(2, 132, 199, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(2, 132, 199, 0); }
+}
+
+.slack-indicator-text {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* 상단 우측 버튼 그룹: 피드백(왼쪽) + 로그인/게스트(오른쪽) */
+.top-bar-right-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.top-bar-user-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--md-shape-corner-full);
+  border: 1.5px solid var(--card-border-color);
+  background-color: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+  font-size: 0.8125rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+  white-space: nowrap;
+}
+
+.top-bar-user-btn:hover {
+  background-color: var(--md-sys-color-primary-container);
+  border-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary-container);
+  transform: translateY(-1px);
+}
+
+.top-bar-user-btn .user-name-text {
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.top-bar-feedback-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: var(--md-shape-corner-full);
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  border: 1px solid var(--card-border-color);
+  font-size: 0.8125rem;
+  font-weight: 800;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease, background-color 0.2s;
+  opacity: 1;
+  transform: scale(1);
+}
+
+.top-bar-feedback-btn:hover {
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+.top-bar-feedback-btn.is-hidden {
+  display: none !important;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.85);
+}
+
+.top-bar-feedback-btn .material-symbols-outlined {
+  font-size: 16px;
+}
+
+/* ==========================================
+   🌟 ☰ ↔ ✖️ 완벽한 모핑 애니메이션 햄버거/닫기 버튼
+   ========================================== */
+.hamburger-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--md-shape-corner-full);
+  background: transparent;
+  border: 1.5px solid var(--card-border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: background-color 0.2s, border-color 0.2s, transform 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.hamburger-btn:hover {
+  background-color: var(--md-sys-color-surface-container-high);
+  border-color: var(--md-sys-color-primary);
+}
+
+.hamburger-lines {
+  width: 18px;
+  height: 14px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hamburger-lines span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background-color: var(--md-sys-color-on-surface);
+  border-radius: 2px;
+  transform-origin: center center !important;
+  transition: transform 0.35s cubic-bezier(0.2, 0, 0, 1), opacity 0.25s ease, width 0.3s ease;
+}
+
+.hamburger-btn.is-close .hamburger-lines span:nth-child(1),
+.nav-drawer.is-open #btn-close-nav-menu .hamburger-lines span:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.hamburger-btn.is-close .hamburger-lines span:nth-child(2),
+.nav-drawer.is-open #btn-close-nav-menu .hamburger-lines span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.hamburger-btn.is-close .hamburger-lines span:nth-child(3),
+.nav-drawer.is-open #btn-close-nav-menu .hamburger-lines span:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+#btn-close-nav-menu:hover {
+  transform: rotate(90deg);
+}
+
+.app-layout {
+  width: 100%;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+  transition: max-width 0.3s ease;
+}
+
+.responsive-dashboard-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.grid-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ==========================================
+   3. 타이포그래피 & 카드
+   ========================================== */
+.title-large { font-size: 1.375rem; font-weight: 800; letter-spacing: -0.01em; }
+.title-medium { font-size: 1.125rem; font-weight: 800; letter-spacing: -0.01em; }
+.label-medium { font-size: 0.875rem; font-weight: 700; }
+.label-small { font-size: 0.75rem; font-weight: 600; }
+.label-unit { font-size: 0.875rem; font-weight: 800; color: var(--md-sys-color-on-background); margin-top: 6px; }
+.body-small { font-size: 0.8125rem; font-weight: 500; color: var(--md-sys-color-outline); margin-top: 2px; }
+
+.material-symbols-outlined { font-size: 20px; vertical-align: middle; }
+
+.md-card {
+  background-color: var(--md-sys-color-surface-container);
+  border-radius: var(--md-shape-corner-large);
+  padding: 24px;
+  border: 1.5px solid var(--card-border-color);
+  box-shadow: var(--md-elevation-1);
+}
+
+.card-header, .card-headline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.card-overline {
+  font-size: 0.6875rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: var(--md-sys-color-primary);
+  display: block;
+  margin-bottom: 3px;
+  text-transform: uppercase;
+}
+
+.widget-order-top-bar {
+  display: flex;
+  width: 100%;
+  margin-bottom: -6px;
+}
+
+.btn-widget-reorder-main {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: var(--md-shape-corner-medium);
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  border: 1px solid var(--card-border-color);
+  font-size: 0.875rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: var(--md-elevation-1);
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.btn-widget-reorder-main:hover {
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  border-color: var(--md-sys-color-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--md-elevation-2);
+}
+
+.btn-widget-reorder-main .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.progress-bottom-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  margin-top: 8px;
+  box-sizing: border-box;
+}
+
+.target-time-chip.compact-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  padding: 6px 10px;
+  border-radius: var(--md-shape-corner-small);
+  background-color: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+  border: 1px solid var(--card-border-color);
+  cursor: pointer;
+  user-select: none;
+  box-sizing: border-box;
+  overflow: hidden;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.target-time-chip.compact-chip:hover {
+  border-color: var(--md-sys-color-primary);
+  background-color: var(--md-sys-color-primary-container);
+}
+
+.chip-icon {
+  display: none !important;
+}
+
+.chip-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--md-sys-color-outline);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.time-input-inline {
+  background: transparent;
+  border: none;
+  color: var(--md-sys-color-primary);
+  font-size: 0.75rem;
+  font-weight: 800;
+  outline: none;
+  cursor: pointer;
+  padding: 0;
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+  font-family: inherit;
+  text-align: center;
+}
+
+.time-input-inline::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+[data-theme="dark"] .time-input-inline::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+}
+
+.md-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--md-shape-corner-full);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.md-button-text {
+  background: transparent;
+  color: var(--md-sys-color-primary);
+  padding: 4px 8px;
+}
+
+.sim-today-btn {
+  font-size: 0.8125rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: var(--md-shape-corner-small);
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.sim-today-btn.is-hidden {
+  display: none !important;
+}
+
+.md-icon-button {
+  background: transparent;
+  border: 1.5px solid var(--card-border-color);
+  color: var(--md-sys-color-on-surface);
+  width: 40px;
+  height: 40px;
+  border-radius: var(--md-shape-corner-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.md-icon-button:hover {
+  background-color: var(--md-sys-color-surface-container-high);
+  border-color: var(--md-sys-color-primary);
+}
+
+/* ==========================================
+   4. 클린 텍스트 플립다운 시계
+   ========================================== */
+.countdown-display {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin: 12px 0 24px;
+}
+
+.countdown-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 64px;
+}
+
+.flip-text-container {
+  position: relative;
+  height: 52px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 250px;
+  -webkit-perspective: 250px;
+}
+
+.flip-num {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.75rem;
+  font-weight: 900;
+  color: var(--md-sys-color-on-surface);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+
+.flip-num.active {
+  transform: translateY(0) rotateX(0deg);
+  opacity: 1;
+}
+
+.flip-num.incoming {
+  transform: translateY(-50%) rotateX(90deg);
+  opacity: 0;
+}
+
+.flip-text-container.flipping-down .flip-num.active {
+  animation: flipTextOutDown 0.42s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.flip-text-container.flipping-down .flip-num.incoming {
+  animation: flipTextInDown 0.42s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes flipTextOutDown {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-100%); opacity: 0; }
+}
+
+@keyframes flipTextInDown {
+  0% { transform: translateY(100%); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.countdown-separator {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--md-sys-color-outline);
+  margin-bottom: 24px;
+}
+
+.linear-progress-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  color: var(--md-sys-color-outline);
+}
+
+.linear-progress-track {
+  width: 100%;
+  height: 8px;
+  background-color: var(--md-sys-color-surface-container-high);
+  border-radius: var(--md-shape-corner-full);
+  border: 1px solid var(--card-border-color);
+  overflow: hidden;
+}
+
+.linear-progress-indicator {
+  height: 100%;
+  width: 0%;
+  background-color: var(--md-sys-color-primary);
+  border-radius: var(--md-shape-corner-full);
+  transition: width 0.4s ease;
+}
+
+/* ==========================================
+   5. 캘린더 그리드 & 날씨 배지 & 연차 배지
+   ========================================== */
+.cal-nav-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.cal-title-area {
+  display: flex;
+  flex-direction: column;
+}
+
+.cal-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cal-nav-buttons {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.calendar-grid-header {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  width: 100%;
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 900;
+  color: var(--md-sys-color-outline);
+  padding: 4px 0 10px;
+  border-bottom: 2px solid var(--card-border-color);
+}
+
+.calendar-grid-header .sun { color: #b91c1c; }
+.calendar-grid-header .sat { color: #0369a1; }
+
+.calendar-viewport {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  min-height: 330px;
+  margin-top: 8px;
+}
+
+.calendar-grid-layer {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 1px;
+  will-change: transform, opacity;
+}
+
+.calendar-grid-layer.active-layer {
+  position: relative;
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.slide-up-exit { animation: slideUpExitAnim 0.32s cubic-bezier(0.2, 0, 0, 1) forwards; }
+.slide-up-enter { animation: slideUpEnterAnim 0.32s cubic-bezier(0.2, 0, 0, 1) forwards; }
+.slide-down-exit { animation: slideDownExitAnim 0.32s cubic-bezier(0.2, 0, 0, 1) forwards; }
+.slide-down-enter { animation: slideDownEnterAnim 0.32s cubic-bezier(0.2, 0, 0, 1) forwards; }
+
+@keyframes slideUpExitAnim {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-100%); opacity: 0; }
+}
+
+@keyframes slideUpEnterAnim {
+  0% { transform: translateY(100%); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideDownExitAnim {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+
+@keyframes slideDownEnterAnim {
+  0% { transform: translateY(-100%); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.cal-cell {
+  min-height: 58px;
+  width: 100%;
+  min-width: 0;
+  background-color: var(--md-sys-color-surface);
+  border: 1.5px solid var(--cal-cell-border);
+  border-radius: var(--md-shape-corner-medium);
+  padding: 5px 4px 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  overflow: hidden;
+  transition: transform 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.cal-cell:hover {
+  border-color: var(--md-sys-color-primary);
+  transform: translateY(-2px);
+}
+
+.cal-cell.other-month {
+  opacity: 0.35;
+  background-color: transparent;
+  border-style: dashed;
+}
+
+.cal-cell-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  min-height: 18px;
+}
+
+.cal-date-num {
+  font-size: 0.9375rem;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--md-sys-color-on-background);
+  letter-spacing: -0.02em;
+}
+
+.cal-cell.sunday .cal-date-num { color: #b91c1c; }
+.cal-cell.saturday .cal-date-num { color: #0369a1; }
+
+.cal-weather-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-start;
+  line-height: 1;
+  gap: 1px;
+  opacity: 0.92;
+  margin-top: -1px;
+}
+
+.cal-weather-icon {
+  font-size: 0.8125rem;
+  line-height: 1;
+  display: block;
+}
+
+.cal-temp {
+  font-size: 0.625rem;
+  font-weight: 900;
+  color: var(--md-sys-color-outline);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.cal-cell.holiday {
+  background-color: #fee2e2;
+  border-color: #f87171;
+}
+.cal-cell.holiday .cal-date-num { color: #991b1b; font-weight: 900; }
+
+.cal-cell.leave-rec {
+  background-color: #d1fae5;
+  border: 1.5px dashed #059669;
+}
+.cal-cell.leave-rec .cal-date-num { color: #065f46; font-weight: 900; }
+
+/* 🌟 내가 등록한 실제 연차 셀 스타일 */
+.cal-cell.my-leave {
+  background-color: #f3e8ff;
+  border-color: #a855f7;
+  border-style: solid;
+}
+.cal-cell.my-leave .cal-date-num {
+  color: #7e22ce;
+  font-weight: 900;
+}
+.cal-cell.my-leave .cal-sub-label {
+  color: #6b21a8;
+  background: rgba(168, 85, 247, 0.25);
+}
+
+[data-theme="dark"] .cal-cell.my-leave {
+  background-color: #3b0764;
+  border-color: #a855f7;
+}
+[data-theme="dark"] .cal-cell.my-leave .cal-date-num {
+  color: #d8b4fe;
+}
+[data-theme="dark"] .cal-cell.my-leave .cal-sub-label {
+  color: #f3e8ff;
+  background: rgba(168, 85, 247, 0.45);
+}
+
+.cal-cell.today {
+  border: 2px solid var(--md-sys-color-primary);
+  background-color: #e0f2fe;
+  box-shadow: inset 0 0 0 1px var(--md-sys-color-primary);
+  outline: none;
+}
+.cal-cell.today .cal-date-num { color: var(--md-sys-color-primary); font-weight: 900; }
+
+.cal-sub-label {
+  font-size: 0.625rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  font-weight: 800;
+  padding: 2px 3px;
+  border-radius: 4px;
+  text-align: center;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cal-sub-label.has-marquee {
+  text-align: left;
+}
+
+.cal-sub-text {
+  display: inline-block;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+.cal-sub-text.is-marquee {
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+  animation: dynamicMarquee 3.6s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes dynamicMarquee {
+  0%, 20% {
+    transform: translateX(0);
+  }
+  80%, 100% {
+    transform: translateX(var(--marquee-dist, -24px));
+  }
+}
+
+.cal-cell.holiday .cal-sub-label {
+  color: #991b1b;
+  background: rgba(239, 68, 68, 0.25);
+}
+
+.cal-cell.leave-rec .cal-sub-label {
+  color: #065f46;
+  background: rgba(168, 185, 129, 0.28);
+}
+
+[data-theme="dark"] .cal-cell.holiday {
+  background-color: #450a0a;
+  border-color: #991b1b;
+}
+[data-theme="dark"] .cal-cell.holiday .cal-date-num { color: #fca5a5; }
+[data-theme="dark"] .cal-cell.holiday .cal-sub-label {
+  color: #fecaca;
+  background: rgba(239, 68, 68, 0.4);
+}
+
+[data-theme="dark"] .cal-cell.leave-rec {
+  background-color: #064e3b;
+  border-color: #059669;
+}
+[data-theme="dark"] .cal-cell.leave-rec .cal-date-num { color: #6ee7b7; }
+[data-theme="dark"] .cal-cell.leave-rec .cal-sub-label {
+  color: #a7f3d0;
+  background: rgba(16, 185, 129, 0.4);
+}
+
+[data-theme="dark"] .cal-cell.today {
+  background-color: #0c2a4a;
+  border-color: var(--md-sys-color-primary);
+  box-shadow: inset 0 0 0 1px var(--md-sys-color-primary);
+  outline: none;
+}
+
+.calendar-legend {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1.5px solid var(--card-border-color);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--md-sys-color-on-background);
+  flex-wrap: wrap;
+}
+
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-dot { width: 9px; height: 9px; border-radius: var(--md-shape-corner-full); }
+.dot-my-leave { background-color: #8b5cf6; }
+.dot-holiday { background-color: #b91c1c; }
+.dot-leave { background-color: #047857; }
+.dot-today { background-color: var(--md-sys-color-primary); }
+
+/* ==========================================
+   6. 해외여행 위젯 & 추천 리스트 & 내 연차 리스트
+   ========================================== */
+.travel-rec-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.travel-card-item {
+  background-color: var(--md-sys-color-surface);
+  border: 1.5px solid var(--card-border-color);
+  border-radius: var(--md-shape-corner-medium);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.travel-item-header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.travel-title-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+}
+
+.travel-period-tag {
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: var(--md-sys-color-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.travel-badge-days {
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: var(--md-shape-corner-small);
+  border: 1px solid rgba(0, 95, 176, 0.2);
+  display: inline-block;
+}
+
+.travel-destinations-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.dest-chip {
+  background-color: var(--md-sys-color-surface-container-high);
+  border: 1px solid var(--card-border-color);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.travel-tip-text {
+  font-size: 0.75rem;
+  color: var(--md-sys-color-outline);
+}
+
+/* 🌟 내가 등록한 연차 목록 카드 스타일 */
+.my-leave-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.my-leave-card-item {
+  background-color: var(--md-sys-color-surface);
+  border: 1.5px solid var(--card-border-color);
+  border-radius: var(--md-shape-corner-medium);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.my-leave-card-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.my-leave-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.my-leave-type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--md-shape-corner-small);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  width: fit-content;
+}
+
+.my-leave-type-badge.type-annual { background-color: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe; }
+.my-leave-type-badge.type-half { background-color: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
+.my-leave-type-badge.type-official { background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+
+[data-theme="dark"] .my-leave-type-badge.type-annual { background-color: #581c87; color: #f3e8ff; border-color: #7e22ce; }
+[data-theme="dark"] .my-leave-type-badge.type-half { background-color: #78350f; color: #fef3c7; border-color: #b45309; }
+[data-theme="dark"] .my-leave-type-badge.type-official { background-color: #0c4a6e; color: #e0f2fe; border-color: #0284c7; }
+
+.my-leave-title {
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: var(--md-sys-color-on-surface);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.my-leave-desc {
+  font-size: 0.75rem;
+  color: var(--md-sys-color-outline);
+}
+
+.btn-delete-leave {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--md-shape-corner-small);
+  border: 1px solid var(--card-border-color);
+  background: transparent;
+  color: var(--md-sys-color-error);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.btn-delete-leave:hover {
+  background-color: var(--md-sys-color-error-container);
+  border-color: var(--md-sys-color-error);
+}
+
+.insight-content-box {
+  background-color: var(--md-sys-color-surface);
+  border-radius: var(--md-shape-corner-medium);
+  padding: 16px;
+  border: 1.5px solid var(--card-border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.insight-header { display: flex; align-items: center; gap: 8px; }
+.insight-badge-icon { color: var(--md-sys-color-primary); font-size: 24px; }
+.insight-headline { font-size: 1.05rem; font-weight: 800; color: var(--md-sys-color-on-surface); }
+.insight-description { font-size: 0.875rem; color: var(--md-sys-color-outline); line-height: 1.6; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.stat-box {
+  background-color: var(--md-sys-color-surface);
+  border: 1.5px solid var(--card-border-color);
+  border-radius: var(--md-shape-corner-medium);
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.stat-box.total {
+  background-color: var(--md-sys-color-primary-container);
+  border-color: rgba(0, 95, 176, 0.35);
+}
+
+.stat-box.total .stat-label,
+.stat-box.total .stat-value { color: var(--md-sys-color-on-primary-container); }
+.stat-box.total .stat-icon { color: var(--md-sys-color-primary); }
+
+.stat-content { display: flex; flex-direction: column; }
+.stat-label { font-size: 0.8125rem; font-weight: 700; color: var(--md-sys-color-outline); margin-bottom: 4px; }
+.stat-value { font-size: 1.5rem; font-weight: 800; color: var(--md-sys-color-on-surface); line-height: 1.2; }
+.stat-sub { font-size: 0.6875rem; font-weight: 600; color: var(--md-sys-color-outline); margin-top: 4px; }
+.stat-icon { font-size: 24px; color: var(--md-sys-color-outline); opacity: 0.8; }
+
+.recommendation-list, .md-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  list-style: none;
+}
+
+.recommendation-item, .md-list-item {
+  background-color: var(--md-sys-color-surface);
+  border: 1.5px solid var(--card-border-color);
+  border-radius: var(--md-shape-corner-medium);
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.item-content h3 { font-size: 0.9375rem; font-weight: 700; margin-bottom: 2px; }
+.item-content p { font-size: 0.8125rem; color: var(--md-sys-color-outline); }
+
+.badge-benefit {
+  background-color: var(--md-sys-color-tertiary-container);
+  color: var(--md-sys-color-on-tertiary-container);
+  border: 1px solid rgba(11, 107, 82, 0.35);
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: var(--md-shape-corner-small);
+  white-space: nowrap;
+}
+
+.holiday-dday {
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  border: 1px solid var(--card-border-color);
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: var(--md-shape-corner-small);
+}
+
+.app-footer {
+  text-align: center;
+  padding: 32px 0 16px;
+  color: var(--md-sys-color-outline);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+/* ==========================================
+   7. 사이드 메뉴 네비게이션 드로어 (좌측)
+   ========================================== */
+.nav-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1250;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.nav-drawer-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.nav-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: 380px;
+  background-color: var(--md-sys-color-surface);
+  z-index: 1350;
+  box-shadow: 5px 0 25px rgba(0, 0, 0, 0.25);
+  border-right: 1.5px solid var(--card-border-color);
+  transform: translateX(-100%);
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s;
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-drawer.is-open {
+  transform: translateX(0);
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.nav-drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1.5px solid var(--card-border-color);
+}
+
+.nav-drawer-title-wrap { display: flex; align-items: baseline; gap: 8px; }
+.nav-title { font-size: 1.25rem; font-weight: 900; color: var(--md-sys-color-on-surface); }
+.nav-version { font-size: 0.75rem; font-weight: 700; color: var(--md-sys-color-outline); }
+
+.nav-menu-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* 드로어 맨 하단에 고정 배치되는 사용자 프로필 영역 */
+.nav-drawer-footer {
+  padding: 14px 16px;
+  border-top: 1.5px solid var(--card-border-color);
+  background-color: var(--md-sys-color-surface);
+  margin-top: auto;
+}
+
+.nav-user-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background-color: var(--md-sys-color-surface-container-high);
+  border: 1.5px solid var(--card-border-color);
+  border-radius: var(--md-shape-corner-medium);
+  gap: 10px;
+}
+
+.nav-user-info-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.nav-user-avatar {
+  font-size: 30px;
+  color: var(--md-sys-color-primary);
+  flex-shrink: 0;
+}
+
+.nav-user-text-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+#nav-user-name {
+  font-size: 0.875rem;
+  color: var(--md-sys-color-on-surface);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#nav-user-status {
+  font-size: 0.6875rem;
+  color: var(--md-sys-color-outline);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-nav-auth-action {
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 5px 12px;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.nav-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background-color: var(--md-sys-color-surface-container);
+  border: 1.5px solid var(--card-border-color);
+  border-radius: var(--md-shape-corner-medium);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s, border-color 0.2s, transform 0.15s;
+}
+
+.nav-menu-item:hover:not(.is-disabled) {
+  background-color: var(--md-sys-color-surface-container-high);
+  border-color: var(--md-sys-color-primary);
+  transform: translateX(2px);
+}
+
+.nav-menu-item.primary-action {
+  background-color: var(--md-sys-color-primary-container);
+  border-color: rgba(0, 95, 176, 0.3);
+}
+.nav-menu-item.primary-action .nav-item-icon,
+.nav-menu-item.primary-action .nav-item-arrow {
+  color: var(--md-sys-color-primary);
+}
+
+.nav-item-icon { font-size: 24px; color: var(--md-sys-color-outline); }
+.nav-item-text { flex: 1; display: flex; flex-direction: column; }
+.nav-item-title { font-size: 0.9375rem; font-weight: 800; color: var(--md-sys-color-on-surface); }
+.nav-item-desc { font-size: 0.75rem; font-weight: 500; color: var(--md-sys-color-outline); }
+.nav-item-arrow { font-size: 20px; color: var(--md-sys-color-outline); }
+
+.nav-section-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--md-sys-color-outline);
+  padding: 12px 6px 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.nav-menu-item.is-disabled { opacity: 0.55; cursor: not-allowed; border-style: dashed; }
+.nav-badge-temp {
+  font-size: 0.625rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background-color: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-outline);
+}
+
+/* ==========================================
+   8. 풀스크린 모달
+   ========================================== */
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 1390;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.drawer-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.simulation-drawer.full-screen-view {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  width: 100dvw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  max-height: 100dvh !important;
+  background-color: var(--md-sys-color-background) !important;
+  z-index: 1400 !important;
+  border: none !important;
+  box-shadow: none !important;
+  transform: translateY(100%);
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.simulation-drawer.full-screen-view.is-open {
+  transform: translateY(0) !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+.fullscreen-drawer-header {
+  width: 100%;
+  background-color: var(--md-sys-color-surface);
+  border-bottom: 1.5px solid var(--card-border-color);
+  box-shadow: var(--md-elevation-1);
+  display: flex;
+  justify-content: center;
+  padding: 12px 16px;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.fullscreen-header-inner {
+  width: 100%;
+  max-width: 1160px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.fullscreen-title-wrap { flex: 1; text-align: left; }
+.drawer-title { font-size: 1.25rem; font-weight: 800; color: var(--md-sys-color-on-surface); }
+.drawer-subtitle { font-size: 0.75rem; font-weight: 600; color: var(--md-sys-color-outline); }
+
+.fullscreen-drawer-scroll {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 24px 16px 20px;
+  box-sizing: border-box;
+}
+
+.fullscreen-content-container {
+  width: 100%;
+  max-width: 780px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.drawer-bottom-spacer {
+  height: 16px;
+  width: 100%;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+/* ==========================================
+   🌟 시뮬레이터 하단 네비게이션 바 & 슬라이드 트랜지션
+   ========================================== */
+.sim-bottom-nav-bar {
+  position: relative;
+  z-index: 20;
+  flex-shrink: 0;
+  width: 100%;
+  background-color: var(--md-sys-color-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1.5px solid var(--card-border-color);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.12);
+  display: flex;
+  justify-content: center;
+  padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 8px));
+  box-sizing: border-box;
+}
+
+.sim-bottom-nav-inner {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sim-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  border-radius: var(--md-shape-corner-full);
+  background-color: var(--md-sys-color-surface-container-high);
+  border: 1.5px solid var(--card-border-color);
+  color: var(--md-sys-color-on-surface);
+  font-size: 0.8125rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sim-nav-btn:hover {
+  background-color: var(--md-sys-color-primary-container);
+  border-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.sim-bottom-center-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+}
+
+.sim-bottom-current-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sim-bottom-badge-label {
+  font-size: 0.625rem;
+  font-weight: 800;
+  color: var(--md-sys-color-outline);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.sim-bottom-badge-date {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--md-sys-color-primary);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.sim-bottom-today-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 12px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  border-radius: var(--md-shape-corner-full);
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  border: 1.5px solid var(--card-border-color);
+  cursor: pointer;
+  white-space: nowrap;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  max-width: 110px;
+  overflow: hidden;
+  box-shadow: var(--md-elevation-1);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+              opacity 0.28s ease, 
+              max-width 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+              padding 0.35s ease, 
+              border-color 0.2s ease,
+              background-color 0.2s ease;
+}
+
+.sim-bottom-today-pill:hover {
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  border-color: var(--md-sys-color-primary);
+  transform: translateY(-1px) scale(1.03);
+}
+
+.sim-bottom-today-pill.is-hidden {
+  opacity: 0 !important;
+  transform: translateY(18px) scale(0.7) !important;
+  max-width: 0 !important;
+  padding: 0 !important;
+  border-width: 0 !important;
+  margin: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ==========================================
+   9. 점심 메뉴 추천 모달 스타일
+   ========================================== */
+.lunch-hero-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+}
+
+.lunch-category-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.filter-chip {
+  padding: 6px 14px;
+  border-radius: var(--md-shape-corner-full);
+  border: 1.5px solid var(--card-border-color);
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-chip.active {
+  background-color: #ea580c;
+  color: #ffffff;
+  border-color: #ea580c;
+}
+
+.lunch-display-box {
+  width: 100%;
+  padding: 30px 20px;
+  background-color: var(--md-sys-color-surface-container-high);
+  border: 2px dashed var(--card-border-color);
+  border-radius: var(--md-shape-corner-large);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 180px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.lunch-display-box.highlight {
+  border-color: #ea580c;
+  border-style: solid;
+  background: linear-gradient(145deg, rgba(234, 88, 12, 0.12), rgba(249, 115, 22, 0.04));
+  box-shadow: 0 0 28px rgba(234, 88, 12, 0.22), inset 0 0 16px rgba(234, 88, 12, 0.08);
+  animation: lunchBoxPop 0.65s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+[data-theme="dark"] .lunch-display-box.highlight {
+  background: linear-gradient(145deg, rgba(234, 88, 12, 0.24), rgba(249, 115, 22, 0.08));
+  box-shadow: 0 0 32px rgba(234, 88, 12, 0.38), inset 0 0 20px rgba(234, 88, 12, 0.15);
+}
+
+@keyframes lunchBoxPop {
+  0% { transform: scale(0.92); }
+  50% { transform: scale(1.035); }
+  100% { transform: scale(1); }
+}
+
+.lunch-icon-wrap {
+  font-size: 48px;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.lunch-icon-wrap.spinning {
+  animation: rouletteSpin 0.6s infinite ease-in-out;
+}
+
+@keyframes rouletteSpin {
+  0% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.25) rotate(180deg); }
+  100% { transform: scale(1) rotate(360deg); }
+}
+
+.lunch-display-box.highlight .lunch-icon-wrap {
+  animation: lunchIconCelebration 0.75s cubic-bezier(0.175, 0.885, 0.32, 1.35) forwards;
+}
+
+@keyframes lunchIconCelebration {
+  0% { transform: scale(0.4) rotate(-20deg); opacity: 0.5; }
+  55% { transform: scale(1.32) rotate(12deg); opacity: 1; }
+  75% { transform: scale(0.95) rotate(-6deg); }
+  100% { transform: scale(1.1) rotate(0deg); }
+}
+
+.lunch-name-display {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #ea580c;
+  line-height: 1.25;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 0 4px;
+}
+
+.lunch-name-display.has-marquee {
+  text-overflow: clip;
+  justify-content: flex-start;
+}
+
+.lunch-name-text {
+  display: inline-block;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+.lunch-name-text.is-marquee {
+  animation: lunchNameMarquee 4.2s ease-in-out infinite alternate;
+}
+
+@keyframes lunchNameMarquee {
+  0%, 20% {
+    transform: translateX(0);
+  }
+  80%, 100% {
+    transform: translateX(var(--lunch-marquee-dist, -24px));
+  }
+}
+
+.lunch-display-box.highlight .lunch-name-display {
+  animation: lunchNameSparkle 0.65s cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+@keyframes lunchNameSparkle {
+  0% { transform: translateY(10px) scale(0.85); opacity: 0; }
+  60% { transform: translateY(-3px) scale(1.08); opacity: 1; text-shadow: 0 0 12px rgba(234, 88, 12, 0.5); }
+  100% { transform: translateY(0) scale(1); opacity: 1; text-shadow: none; }
+}
+
+.lunch-desc-display {
+  font-size: 0.875rem;
+  color: var(--md-sys-color-outline);
+  line-height: 1.5;
+}
+
+.lunch-display-box.highlight .lunch-desc-display {
+  animation: lunchDescFade 0.7s cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+@keyframes lunchDescFade {
+  0% { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.lunch-spin-btn {
+  background: linear-gradient(135deg, #ea580c, #f97316);
+  color: #ffffff;
+  border: none;
+  padding: 14px 28px;
+  border-radius: var(--md-shape-corner-full);
+  font-size: 1rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.lunch-spin-btn:hover {
+  transform: scale(1.03);
+  box-shadow: 0 6px 18px rgba(234, 88, 12, 0.45);
+}
+
+.situation-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.situation-item {
+  background-color: var(--md-sys-color-surface);
+  border: 1.5px solid var(--card-border-color);
+  border-radius: var(--md-shape-corner-medium);
+  padding: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.situation-emoji {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.situation-info strong {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--md-sys-color-on-surface);
+  margin-bottom: 2px;
+}
+
+.situation-info p {
+  font-size: 0.75rem;
+  color: var(--md-sys-color-outline);
+}
+
+/* ==========================================
+   10. 루팡 & 시간때우기 모달 스타일
+   ========================================== */
+.slacking-calculator-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.slack-wage-type-toggle {
+  display: flex;
+  gap: 6px;
+  background-color: var(--md-sys-color-surface-container-high);
+  padding: 4px;
+  border-radius: var(--md-shape-corner-medium);
+  border: 1px solid var(--card-border-color);
+  width: fit-content;
+}
+
+.slack-type-btn {
+  border: none;
+  background: transparent;
+  padding: 6px 14px;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  border-radius: var(--md-shape-corner-small);
+  color: var(--md-sys-color-outline);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.slack-type-btn.active {
+  background-color: #0284c7;
+  color: #ffffff;
+  box-shadow: var(--md-elevation-1);
+}
+
+.calculator-inputs {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.calc-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-with-unit {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.input-with-unit .calc-input {
+  padding-right: 48px;
+}
+
+.input-unit {
+  position: absolute;
+  right: 12px;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: var(--md-sys-color-outline);
+  pointer-events: none;
+}
+
+.calc-sub-hint {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--md-sys-color-primary);
+}
+
+.calc-label {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--md-sys-color-outline);
+}
+
+.calc-input {
+  background-color: var(--md-sys-color-surface);
+  border: 1.5px solid var(--card-border-color);
+  color: var(--md-sys-color-on-surface);
+  padding: 9px 12px;
+  border-radius: var(--md-shape-corner-small);
+  font-size: 0.9375rem;
+  font-weight: 800;
+  width: 150px;
+  outline: none;
+}
+
+.calc-btn {
+  background-color: #0284c7;
+  color: #ffffff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: var(--md-shape-corner-small);
+  font-size: 0.875rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  height: 42px;
+}
+
+.calc-btn.running {
+  background-color: #dc2626;
+}
+
+.slacking-counter-box {
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.08), rgba(2, 132, 199, 0.18));
+  border: 2px solid #0284c7;
+  border-radius: var(--md-shape-corner-large);
+  padding: 24px 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.slacking-time-text {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--md-sys-color-outline);
+}
+
+.slacking-money-earned {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #0284c7;
+  line-height: 1;
+}
+
+.slack-won {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-left: 4px;
+}
+
+.slack-cheer {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--md-sys-color-outline);
+}
+
+.slack-tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.slack-tip-item {
+  background-color: var(--md-sys-color-surface);
+  border: 1.5px solid var(--card-border-color);
+  border-radius: var(--md-shape-corner-medium);
+  padding: 16px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.tip-badge {
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  font-size: 0.75rem;
+  font-weight: 900;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.tip-content strong {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: var(--md-sys-color-on-surface);
+  margin-bottom: 4px;
+}
+
+.tip-content p {
+  font-size: 0.8125rem;
+  color: var(--md-sys-color-outline);
+  line-height: 1.5;
+}
+
+/* ==========================================
+   11. 메인 위젯 순서 설정 모달 스타일
+   ========================================== */
+.widget-order-modal {
+  max-width: 440px;
+}
+
+.widget-order-guide {
+  font-size: 0.8125rem;
+  color: var(--md-sys-color-outline);
+  margin-bottom: 12px;
+}
+
+.widget-order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 2px;
+}
+
+.widget-order-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background-color: var(--md-sys-color-surface-container-high);
+  border: 1.5px solid var(--card-border-color);
+  border-radius: var(--md-shape-corner-medium);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.widget-order-item-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.widget-order-index {
+  font-size: 0.75rem;
+  font-weight: 900;
+  color: var(--md-sys-color-outline);
+  width: 20px;
+  text-align: center;
+}
+
+.widget-order-name {
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: var(--md-sys-color-on-surface);
+}
+
+.widget-order-btns {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-order-move {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--card-border-color);
+  background-color: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-order-move:hover:not(:disabled) {
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  border-color: var(--md-sys-color-primary);
+}
+
+.btn-order-move:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.widget-order-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1.5px solid var(--card-border-color);
+}
+
+/* ==========================================
+   12. 달력 상세 모달
+   ========================================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.modal-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.cal-detail-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.92);
+  width: 90%;
+  max-width: 420px;
+  background-color: var(--md-sys-color-surface);
+  border: 1.5px solid var(--card-border-color);
+  border-radius: var(--md-shape-corner-large);
+  box-shadow: var(--md-elevation-3);
+  z-index: 1550;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.cal-detail-modal.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1.5px solid var(--card-border-color);
+  padding-bottom: 12px;
+}
+
+.modal-title-wrap { display: flex; align-items: center; gap: 10px; }
+.modal-icon { font-size: 28px; color: var(--md-sys-color-primary); }
+.modal-date { font-size: 1.05rem; font-weight: 800; color: var(--md-sys-color-on-surface); }
+
+.modal-status-badge {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: var(--md-shape-corner-full);
+  display: inline-block;
+  margin-top: 3px;
+}
+
+.modal-status-badge.holiday { background-color: var(--md-sys-color-error-container); color: var(--md-sys-color-error); }
+.modal-status-badge.leave { background-color: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container); }
+.modal-status-badge.normal { background-color: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-outline); }
+.modal-close-btn { width: 32px; height: 32px; }
+
+.modal-body { display: flex; flex-direction: column; gap: 12px; }
+.modal-info-row { display: flex; flex-direction: column; gap: 4px; }
+.info-label { font-size: 0.75rem; font-weight: 700; color: var(--md-sys-color-outline); }
+.info-value-highlight { font-size: 1.15rem; font-weight: 800; color: var(--md-sys-color-primary); }
+.info-value-desc { font-size: 0.875rem; font-weight: 500; line-height: 1.5; color: var(--md-sys-color-on-surface); }
+
+/* ==========================================
+   13. 피드백 작성 모달 및 플로팅 FAB 스타일
+   ========================================== */
+.feedback-fab.right-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 18px;
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  border: 1.5px solid var(--card-border-color);
+  border-radius: var(--md-shape-corner-full);
+  font-size: 0.875rem;
+  font-weight: 800;
+  box-shadow: var(--md-elevation-3);
+  cursor: pointer;
+  transform: translateZ(0);
+  transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1), opacity 0.25s ease;
+  will-change: transform, opacity;
+}
+
+.feedback-fab.right-fab:hover {
+  transform: scale(1.05);
+}
+
+.feedback-fab.right-fab.is-hidden {
+  transform: translateY(90px) scale(0.85);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.feedback-modal-card {
+  max-width: 440px;
+}
+
+.feedback-form-content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-group-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fb-label {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--md-sys-color-outline);
+}
+
+.fb-select, .fb-textarea {
+  width: 100%;
+  background-color: var(--md-sys-color-surface-container-high);
+  border: 1.5px solid var(--card-border-color);
+  color: var(--md-sys-color-on-surface);
+  border-radius: var(--md-shape-corner-small);
+  padding: 10px 12px;
+  font-size: 0.875rem;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.fb-select:focus, .fb-textarea:focus {
+  border-color: var(--md-sys-color-primary);
+}
+
+.fb-textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+.fb-submit-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 18px;
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  border: none;
+  border-radius: var(--md-shape-corner-small);
+  font-size: 0.9375rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.fb-submit-btn:hover:not(:disabled) {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.fb-submit-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ==========================================
+   14. 로그인 & 회원가입 전용 모달 스타일
+   ========================================== */
+.auth-modal-card {
+  max-width: 400px;
+}
+
+.auth-modal-card .feedback-form-content {
+  gap: 12px;
+}
+
+.auth-modal-card .fb-select {
+  padding: 10px 12px;
+  font-size: 0.9375rem;
+}
+
+/* 회원가입/게스트 수직 배치 링크 스타일 */
+.auth-bottom-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 0.8125rem;
+}
+
+.auth-link-primary {
+  background: none;
+  border: none;
+  color: var(--md-sys-color-primary);
+  font-weight: 800;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.auth-link-secondary {
+  background: none;
+  border: none;
+  color: var(--md-sys-color-outline);
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.auth-link-primary:hover, .auth-link-secondary:hover {
+  text-decoration: underline;
+}
+
+/* ==========================================
+   15. 테마 모드 FAB 컨트롤러
+   ========================================== */
+.theme-switcher-fab.left-fab {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  right: auto;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  transform: translateZ(0);
+  transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1), opacity 0.25s ease;
+  will-change: transform, opacity;
+}
+
+@media (max-width: 1023px) {
+  .theme-switcher-fab.left-fab.is-hidden {
+    transform: translateY(90px) scale(0.85);
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.md-fab {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--md-shape-corner-large);
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  border: 1.5px solid var(--card-border-color);
+  box-shadow: var(--md-elevation-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.md-fab:hover { transform: scale(1.05); }
+
+.theme-menu {
+  display: none;
+  flex-direction: column;
+  background-color: var(--md-sys-color-surface-container-high);
+  border-radius: var(--md-shape-corner-medium);
+  box-shadow: var(--md-elevation-2);
+  border: 1.5px solid var(--card-border-color);
+  overflow: hidden;
+  min-width: 120px;
+}
+
+.theme-menu.active { display: flex; }
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  color: var(--md-sys-color-on-surface);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+
+.theme-option:hover {
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.theme-option.selected { font-weight: 800; color: var(--md-sys-color-primary); }
+
+/* ==========================================
+   16. 반응형 미디어 쿼리
+   ========================================== */
+@media (max-width: 767px) {
+  body { padding: 76px 12px 72px; }
+  .app-top-bar { padding: 8px 10px; }
+  .brand-title { font-size: 1.1rem; }
+  .brand-subtitle { display: none; }
+  .top-bar-left { gap: 8px; }
+  .hamburger-btn { width: 36px; height: 36px; }
+  
+  .top-bar-slack-indicator {
+    padding: 3px 8px;
+    font-size: 0.625rem;
+    gap: 4px;
+  }
+
+  .top-bar-user-btn {
+    padding: 5px 8px;
+    font-size: 0.75rem;
+    gap: 4px;
+  }
+  .top-bar-user-btn .user-name-text {
+    max-width: 55px;
+  }
+  
+  .top-bar-feedback-btn { padding: 5px 10px; font-size: 0.75rem; }
+  .md-card { padding: 16px; }
+  .flip-text-container { height: 40px; }
+  .flip-num { font-size: 2.15rem; }
+  .countdown-unit { min-width: 50px; }
+  .countdown-display { gap: 8px; }
+  .countdown-separator { font-size: 1.4rem; margin-bottom: 20px; }
+
+  .progress-bottom-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 6px;
+    width: 100%;
+  }
+  .target-time-chip.compact-chip {
+    padding: 5px 4px;
+    gap: 4px;
+    min-width: 0;
+  }
+  .target-time-chip .chip-label {
+    font-size: 0.6875rem;
+    flex-shrink: 0;
+  }
+  .target-time-chip .time-input-inline {
+    font-size: 0.6875rem;
+    min-width: 0;
+  }
+
+  .stats-grid, .situation-grid { grid-template-columns: 1fr; }
+  .calendar-viewport { min-height: 285px; }
+  .cal-cell { min-height: 52px; padding: 4px 3px 3px; }
+  .cal-date-num { font-size: 0.85rem; }
+  .cal-weather-icon { font-size: 0.75rem; }
+  .cal-temp { font-size: 0.5625rem; }
+  .cal-sub-label { font-size: 0.5625rem; }
+  .recommendation-item { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .theme-switcher-fab.left-fab { bottom: 16px; left: 16px; }
+  .feedback-fab.right-fab { bottom: 16px; right: 16px; padding: 10px 14px; font-size: 0.8125rem; }
+  .fullscreen-drawer-header { padding: 10px 12px; }
+  .drawer-title { font-size: 1.1rem; }
+  .drawer-subtitle { display: none; }
+  .fullscreen-drawer-scroll { padding: 16px 12px 0; }
+  .sim-nav-btn .btn-text { display: none; }
+  .calc-input { width: 130px; }
+
+  .sim-bottom-current-badge { padding: 2px 4px; }
+  .sim-bottom-badge-date { font-size: 0.9375rem; }
+  .sim-bottom-today-pill { font-size: 0.6875rem; padding: 4px 8px; }
+}
+
+@media (min-width: 1024px) {
+  body { padding: 92px 24px 80px; }
+  .app-layout { max-width: 1160px; gap: 28px; }
+  .brand-title { font-size: 1.5rem; }
+  .responsive-dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    align-items: start;
+  }
+  .calendar-viewport { min-height: 380px; }
+  .cal-cell { min-height: 72px; padding: 6px 8px; }
+  .cal-date-num { font-size: 1rem; }
+  .cal-weather-icon { font-size: 0.9375rem; }
+  .cal-temp { font-size: 0.6875rem; }
+  .cal-sub-label { font-size: 0.725rem; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
