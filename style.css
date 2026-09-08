@@ -68,7 +68,6 @@
   --md-elevation-3: 0 10px 18px 0 rgba(0, 0, 0, 0.65);
 }
 
-/* 자동 모드일 때 OS 다크모드 활성화 시에만 적용 */
 @media (prefers-color-scheme: dark) {
   [data-theme="auto"] {
     --md-sys-color-primary: #9ecafe;
@@ -121,7 +120,7 @@
   [data-theme="auto"] .cal-cell.leave-rec .cal-date-num { color: #6ee7b7; }
   [data-theme="auto"] .cal-cell.leave-rec .cal-sub-label {
     color: #a7f3d0;
-    background: rgba(16, 185, 129, 0.4);
+    background: rgba(168, 185, 129, 0.4);
   }
 
   [data-theme="auto"] .cal-cell.my-leave {
@@ -166,7 +165,6 @@ body {
   overflow-x: hidden;
 }
 
-/* 🌟 초기 로딩 중 스크롤 및 터치 잠금 */
 body.is-loading {
   overflow: hidden !important;
   touch-action: none;
@@ -283,12 +281,8 @@ body.is-loading {
 }
 
 @keyframes brandTitleMarquee {
-  0%, 20% {
-    transform: translateX(0);
-  }
-  80%, 100% {
-    transform: translateX(var(--title-marquee-dist, -24px));
-  }
+  0%, 20% { transform: translateX(0); }
+  80%, 100% { transform: translateX(var(--title-marquee-dist, -24px)); }
 }
 
 .brand-subtitle {
@@ -300,7 +294,6 @@ body.is-loading {
   text-overflow: ellipsis;
 }
 
-/* 🌟 조그마하고 깔끔한 루팡 중 인디케이터 배지 */
 .top-bar-slack-indicator {
   display: inline-flex;
   align-items: center;
@@ -362,12 +355,13 @@ body.is-loading {
   gap: 2px;
 }
 
-/* 상단 우측 버튼 그룹: 피드백(왼쪽) + 로그인/게스트(오른쪽) */
+/* 상단 우측 버튼 그룹 & 팝업 기준점 */
 .top-bar-right-actions {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+  position: relative;
 }
 
 .top-bar-user-btn {
@@ -435,7 +429,129 @@ body.is-loading {
 }
 
 /* ==========================================
-   🌟 ☰ ↔ ✖️ 완벽한 모핑 애니메이션 햄버거/닫기 버튼
+   🌟 우측 상단 확대 애니메이션 프로필 팝업
+   ========================================== */
+.profile-popup-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1150;
+  background: transparent;
+  display: none;
+}
+
+.profile-popup-backdrop.is-open {
+  display: block;
+}
+
+.profile-popup {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 250px;
+  background-color: var(--md-sys-color-surface);
+  border: 1.5px solid var(--card-border-color);
+  border-radius: var(--md-shape-corner-large);
+  box-shadow: var(--md-elevation-3);
+  padding: 16px;
+  z-index: 1200;
+  transform-origin: top right;
+  transform: scale(0.15);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease, visibility 0.28s;
+}
+
+.profile-popup.is-open {
+  transform: scale(1);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.profile-popup-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1.5px solid var(--card-border-color);
+  margin-bottom: 8px;
+}
+
+.profile-popup-avatar {
+  font-size: 38px;
+  color: var(--md-sys-color-primary);
+  flex-shrink: 0;
+}
+
+.profile-popup-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.profile-popup-name {
+  font-size: 0.9375rem;
+  font-weight: 900;
+  color: var(--md-sys-color-on-surface);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-popup-id {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--md-sys-color-outline);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.profile-popup-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-popup-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: var(--md-shape-corner-small);
+  border: none;
+  background: transparent;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: var(--md-sys-color-on-surface);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.profile-popup-item:hover {
+  background-color: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-primary);
+}
+
+.profile-popup-item.text-danger {
+  color: var(--md-sys-color-error);
+}
+
+.profile-popup-item.text-danger:hover {
+  background-color: var(--md-sys-color-error-container);
+  color: var(--md-sys-color-error);
+}
+
+.profile-popup-item .material-symbols-outlined {
+  font-size: 20px;
+}
+
+/* ==========================================
+   3. 햄버거 버튼
    ========================================== */
 .hamburger-btn {
   position: relative;
@@ -522,7 +638,7 @@ body.is-loading {
 }
 
 /* ==========================================
-   3. 타이포그래피 & 카드
+   4. 타이포그래피 & 카드
    ========================================== */
 .title-large { font-size: 1.375rem; font-weight: 800; letter-spacing: -0.01em; }
 .title-medium { font-size: 1.125rem; font-weight: 800; letter-spacing: -0.01em; }
@@ -717,7 +833,7 @@ body.is-loading {
 }
 
 /* ==========================================
-   4. 클린 텍스트 플립다운 시계
+   5. 클린 텍스트 플립다운 시계
    ========================================== */
 .countdown-display {
   display: flex;
@@ -830,7 +946,7 @@ body.is-loading {
 }
 
 /* ==========================================
-   5. 캘린더 그리드 & 날씨 배지 & 연차 배지
+   6. 캘린더 그리드 & 배지
    ========================================== */
 .cal-nav-bar {
   display: flex;
@@ -1006,7 +1122,6 @@ body.is-loading {
 }
 .cal-cell.leave-rec .cal-date-num { color: #065f46; font-weight: 900; }
 
-/* 🌟 내가 등록한 실제 연차 셀 스타일 */
 .cal-cell.my-leave {
   background-color: #f3e8ff;
   border-color: #a855f7;
@@ -1077,12 +1192,8 @@ body.is-loading {
 }
 
 @keyframes dynamicMarquee {
-  0%, 20% {
-    transform: translateX(0);
-  }
-  80%, 100% {
-    transform: translateX(var(--marquee-dist, -24px));
-  }
+  0%, 20% { transform: translateX(0); }
+  80%, 100% { transform: translateX(var(--marquee-dist, -24px)); }
 }
 
 .cal-cell.holiday .cal-sub-label {
@@ -1143,7 +1254,7 @@ body.is-loading {
 .dot-today { background-color: var(--md-sys-color-primary); }
 
 /* ==========================================
-   6. 해외여행 위젯 & 추천 리스트 & 내 연차 리스트
+   7. 여행 및 내 연차 리스트
    ========================================== */
 .travel-rec-list {
   display: flex;
@@ -1217,7 +1328,6 @@ body.is-loading {
   color: var(--md-sys-color-outline);
 }
 
-/* 🌟 내가 등록한 연차 목록 카드 스타일 */
 .my-leave-list {
   display: flex;
   flex-direction: column;
@@ -1396,7 +1506,7 @@ body.is-loading {
 }
 
 /* ==========================================
-   7. 사이드 메뉴 네비게이션 드로어 (좌측)
+   8. 사이드 메뉴 네비게이션 드로어
    ========================================== */
 .nav-drawer-backdrop {
   position: fixed;
@@ -1461,7 +1571,6 @@ body.is-loading {
   gap: 10px;
 }
 
-/* 드로어 맨 하단에 고정 배치되는 사용자 프로필 영역 */
 .nav-drawer-footer {
   padding: 14px 16px;
   border-top: 1.5px solid var(--card-border-color);
@@ -1578,7 +1687,7 @@ body.is-loading {
 }
 
 /* ==========================================
-   8. 풀스크린 모달
+   9. 풀스크린 모달
    ========================================== */
 .drawer-backdrop {
   position: fixed;
@@ -1681,9 +1790,6 @@ body.is-loading {
   pointer-events: none;
 }
 
-/* ==========================================
-   🌟 시뮬레이터 하단 네비게이션 바 & 슬라이드 트랜지션
-   ========================================== */
 .sim-bottom-nav-bar {
   position: relative;
   z-index: 20;
@@ -1808,7 +1914,7 @@ body.is-loading {
 }
 
 /* ==========================================
-   9. 점심 메뉴 추천 모달 스타일
+   10. 점심 메뉴 추천 스타일
    ========================================== */
 .lunch-hero-card {
   display: flex;
@@ -1939,12 +2045,8 @@ body.is-loading {
 }
 
 @keyframes lunchNameMarquee {
-  0%, 20% {
-    transform: translateX(0);
-  }
-  80%, 100% {
-    transform: translateX(var(--lunch-marquee-dist, -24px));
-  }
+  0%, 20% { transform: translateX(0); }
+  80%, 100% { transform: translateX(var(--lunch-marquee-dist, -24px)); }
 }
 
 .lunch-display-box.highlight .lunch-name-display {
@@ -2027,7 +2129,7 @@ body.is-loading {
 }
 
 /* ==========================================
-   10. 루팡 & 시간때우기 모달 스타일
+   11. 루팡 계산기
    ========================================== */
 .slacking-calculator-card {
   display: flex;
@@ -2216,7 +2318,7 @@ body.is-loading {
 }
 
 /* ==========================================
-   11. 메인 위젯 순서 설정 모달 스타일
+   12. 메인 위젯 순서 설정 모달
    ========================================== */
 .widget-order-modal {
   max-width: 440px;
@@ -2309,7 +2411,7 @@ body.is-loading {
 }
 
 /* ==========================================
-   12. 달력 상세 모달
+   13. 상세 팝업 & 인증 모달
    ========================================== */
 .modal-backdrop {
   position: fixed;
@@ -2390,7 +2492,7 @@ body.is-loading {
 .info-value-desc { font-size: 0.875rem; font-weight: 500; line-height: 1.5; color: var(--md-sys-color-on-surface); }
 
 /* ==========================================
-   13. 피드백 작성 모달 및 플로팅 FAB 스타일
+   14. 피드백 플로팅 버튼 & 폼
    ========================================== */
 .feedback-fab.right-fab {
   position: fixed;
@@ -2496,7 +2598,7 @@ body.is-loading {
 }
 
 /* ==========================================
-   14. 로그인 & 회원가입 전용 모달 스타일
+   15. 인증 모달
    ========================================== */
 .auth-modal-card {
   max-width: 400px;
@@ -2511,7 +2613,6 @@ body.is-loading {
   font-size: 0.9375rem;
 }
 
-/* 회원가입/게스트 수직 배치 링크 스타일 */
 .auth-bottom-links {
   display: flex;
   flex-direction: column;
@@ -2544,7 +2645,7 @@ body.is-loading {
 }
 
 /* ==========================================
-   15. 테마 모드 FAB 컨트롤러
+   16. 테마 모드 FAB 컨트롤러
    ========================================== */
 .theme-switcher-fab.left-fab {
   position: fixed;
@@ -2621,7 +2722,7 @@ body.is-loading {
 .theme-option.selected { font-weight: 800; color: var(--md-sys-color-primary); }
 
 /* ==========================================
-   16. 반응형 미디어 쿼리
+   17. 반응형 미디어 쿼리
    ========================================== */
 @media (max-width: 767px) {
   body { padding: 76px 12px 72px; }
@@ -2647,6 +2748,8 @@ body.is-loading {
   }
   
   .top-bar-feedback-btn { padding: 5px 10px; font-size: 0.75rem; }
+  .profile-popup { width: 220px; right: 0; }
+
   .md-card { padding: 16px; }
   .flip-text-container { height: 40px; }
   .flip-num { font-size: 2.15rem; }
