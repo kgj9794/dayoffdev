@@ -50,7 +50,7 @@
         </div>
       </div>
 
-      <!-- ☕ 루팡 진행 중 최상단 조그마한 '루팡 중' 배지 (스크립트 호환용 히든 텍스트 포함) -->
+      <!-- ☕ 루팡 진행 중 최상단 조그마한 '루팡 중' 배지 -->
       <button type="button" class="top-bar-slack-indicator is-hidden" id="btn-top-slack-indicator" title="슬기로운 루팡 가이드 열기">
         <span class="slack-pulse-dot"></span>
         <span class="slack-indicator-text">☕ 루팡 중</span>
@@ -58,7 +58,7 @@
         <span id="top-slack-amount" style="display: none;">0</span>
       </button>
 
-      <!-- 상단 우측 액션 영역 (피드백 버튼 -> 맨 오른쪽 로그인/게스트 버튼 순서) -->
+      <!-- 상단 우측 액션 영역 -->
       <div class="top-bar-right-actions">
         <!-- 🌟 스크롤 시 게스트 버튼 왼쪽에 나타나는 피드백 버튼 -->
         <button type="button" class="top-bar-feedback-btn is-hidden" id="btn-top-feedback" title="피드백 작성">
@@ -71,9 +71,33 @@
           <span class="material-symbols-outlined" style="font-size: 18px;">account_circle</span>
           <span class="user-name-text" id="top-user-name">로그인</span>
         </button>
+
+        <!-- 🌟 우측 상단 확대 애니메이션 프로필 팝업 메뉴 -->
+        <div class="profile-popup" id="profile-popup" role="dialog" aria-hidden="true">
+          <div class="profile-popup-header">
+            <span class="material-symbols-outlined profile-popup-avatar">account_circle</span>
+            <div class="profile-popup-info">
+              <strong class="profile-popup-name" id="popup-user-name">사용자</strong>
+              <span class="profile-popup-id" id="popup-user-id">아이디: -</span>
+            </div>
+          </div>
+          <div class="profile-popup-menu">
+            <button type="button" class="profile-popup-item" id="btn-popup-change-pw">
+              <span class="material-symbols-outlined">lock_reset</span>
+              <span>비밀번호 변경</span>
+            </button>
+            <button type="button" class="profile-popup-item text-danger" id="btn-popup-logout">
+              <span class="material-symbols-outlined">logout</span>
+              <span>로그아웃</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </header>
+
+  <!-- 프로필 팝업 배경 터치 닫기용 투명 백드롭 -->
+  <div class="profile-popup-backdrop" id="profile-popup-backdrop"></div>
 
   <!-- ==========================================
        1. 메인 대시보드 (좌/우 균등 배치)
@@ -83,7 +107,7 @@
       <!-- 좌측 칼럼 영역 (4개 위젯) -->
       <div class="grid-col primary-col" id="col-primary">
         
-        <!-- REALTIME COUNTDOWN 상단: 위젯 순서 변경 버튼 바 -->
+        <!-- 위젯 순서 변경 버튼 바 -->
         <div class="widget-order-top-bar">
           <button type="button" class="btn-widget-reorder-main" id="btn-open-widget-order" title="대시보드 위젯 순서 변경">
             <span class="material-symbols-outlined">swap_vert</span>
@@ -262,7 +286,7 @@
         </section>
       </div>
 
-      <!-- 우측 칼럼 영역 (3개 위젯: 다가오는 공휴일 -> 가성비 연차 추천 -> 해외여행 추천) -->
+      <!-- 우측 칼럼 영역 (3개 위젯) -->
       <div class="grid-col secondary-col" id="col-secondary">
         <!-- 위젯 5: 실시간 다가오는 공휴일 일정 -->
         <section class="md-card dashboard-widget" data-widget-id="holidays" id="widget-holidays">
@@ -317,7 +341,6 @@
         <h2 class="nav-title">메뉴</h2>
         <span class="nav-version">v2.0.0</span>
       </div>
-      <!-- 일체감 있는 애니메이션 닫기 버튼 -->
       <button type="button" class="hamburger-btn" id="btn-close-nav-menu" aria-label="메뉴 닫기" title="메뉴 닫기">
         <div class="hamburger-lines">
           <span></span>
@@ -328,7 +351,7 @@
     </div>
     
     <nav class="nav-menu-list">
-      <!-- 1. 연차 추가하기 (로그인 상태 연동) -->
+      <!-- 1. 연차 추가하기 -->
       <button type="button" class="nav-menu-item feature-item" id="menu-open-my-leaves">
         <span class="material-symbols-outlined nav-item-icon" style="color: #8b5cf6;">calendar_add_on</span>
         <div class="nav-item-text">
@@ -389,7 +412,7 @@
       </button>
     </nav>
 
-    <!-- 사용자 로그인 프로필 카드 (드로어 맨 하단에 배치) -->
+    <!-- 사용자 로그인 프로필 카드 -->
     <div class="nav-drawer-footer">
       <div class="nav-user-card" id="nav-user-card">
         <div class="nav-user-info-wrap">
@@ -405,7 +428,7 @@
   </aside>
 
   <!-- ==========================================
-       🌟 3. 연차 추가하기 모달 (풀스크린 달력 + 목록)
+       3. 연차 추가하기 모달 (풀스크린)
        ========================================== -->
   <div class="drawer-backdrop" id="my-leave-drawer-backdrop"></div>
   <aside class="simulation-drawer full-screen-view" id="my-leave-drawer" aria-label="연차 추가하기">
@@ -423,7 +446,6 @@
 
     <div class="fullscreen-drawer-scroll">
       <div class="fullscreen-content-container">
-        <!-- 연차 등록 인터랙티브 달력 (슬라이딩 애니메이션 레이어 지원) -->
         <section class="md-card">
           <div class="cal-nav-bar">
             <div class="cal-title-area">
@@ -463,7 +485,6 @@
           </div>
         </section>
 
-        <!-- 내가 등록한 연차 목록 카드 -->
         <section class="md-card">
           <div class="card-headline">
             <div>
@@ -472,9 +493,7 @@
               <p class="body-small" id="my-leave-count-desc">등록된 연차 일정을 불러오는 중입니다.</p>
             </div>
           </div>
-          <div class="my-leave-list" id="my-leave-registered-list">
-            <!-- JS 동적 렌더링 -->
-          </div>
+          <div class="my-leave-list" id="my-leave-registered-list"></div>
         </section>
 
         <div class="drawer-bottom-spacer" aria-hidden="true"></div>
@@ -483,7 +502,7 @@
   </aside>
 
   <!-- ==========================================
-       🌟 4. 연차 일정 상세 등록 & 삭제 팝업 모달
+       4. 연차 일정 상세 등록 & 삭제 팝업 모달
        ========================================== -->
   <div class="modal-backdrop" id="leave-reg-modal-backdrop"></div>
   <div class="cal-detail-modal feedback-modal-card" id="leave-reg-modal" role="dialog" aria-modal="true">
@@ -524,7 +543,6 @@
           <textarea id="leave-reg-content" class="fb-textarea" rows="3" placeholder="상세한 휴가 사유나 메모를 입력하세요."></textarea>
         </div>
 
-        <!-- 🌟 등록 / 수정 및 삭제 액션 버튼 영역 -->
         <div class="leave-modal-action-group" style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px;">
           <button type="submit" id="btn-leave-reg-submit" class="fb-submit-btn" style="background-color: #8b5cf6;">
             <span class="material-symbols-outlined" id="leave-reg-btn-icon" style="font-size: 18px;">check_circle</span>
@@ -541,7 +559,7 @@
   </div>
 
   <!-- ==========================================
-       5. 미래 연차 시뮬레이터 (풀스크린 모달 + 하단 고정바)
+       5. 미래 연차 시뮬레이터 (풀스크린)
        ========================================== -->
   <div class="drawer-backdrop" id="sim-drawer-backdrop"></div>
   <aside class="simulation-drawer full-screen-view" id="simulation-drawer" aria-label="미래 연차 시뮬레이터">
@@ -559,7 +577,6 @@
 
     <div class="fullscreen-drawer-scroll">
       <div class="fullscreen-content-container">
-        <!-- 1. 상단 캘린더 -->
         <section class="md-card">
           <div class="cal-nav-bar">
             <div class="cal-title-area">
@@ -592,7 +609,6 @@
           </div>
         </section>
 
-        <!-- 2. 브리핑 -->
         <section class="md-card insight-card">
           <div class="card-headline">
             <div>
@@ -609,7 +625,6 @@
           </div>
         </section>
 
-        <!-- 3. 현황 통계 -->
         <section class="md-card">
           <div class="card-headline">
             <div>
@@ -656,7 +671,6 @@
           </div>
         </section>
 
-        <!-- 4. 공휴일 일정 -->
         <section class="md-card">
           <div class="card-headline">
             <div>
@@ -668,7 +682,6 @@
           <ul class="md-list" id="sim-holiday-list"></ul>
         </section>
 
-        <!-- 5. 연차 추천 -->
         <section class="md-card">
           <div class="card-headline">
             <div>
@@ -680,7 +693,6 @@
           <div class="recommendation-list" id="sim-vacation-recommendations"></div>
         </section>
 
-        <!-- 6. 시뮬레이터 전용 TRAVEL PLANNER 위젯 -->
         <section class="md-card travel-recommend-card">
           <div class="card-headline">
             <div>
@@ -692,7 +704,6 @@
           <div class="travel-rec-list" id="sim-travel-recommendations"></div>
         </section>
 
-        <!-- 하단 고정바 여백 스페이서 -->
         <div class="drawer-bottom-spacer" aria-hidden="true"></div>
       </div>
     </div>
@@ -814,7 +825,7 @@
   </aside>
 
   <!-- ==========================================
-       7. 루팡하는 방법 (시간때우기) 모달 (풀스크린)
+       7. 루팡 가이드 모달 (풀스크린)
        ========================================== -->
   <div class="drawer-backdrop" id="slacking-drawer-backdrop"></div>
   <aside class="simulation-drawer full-screen-view" id="slacking-drawer" aria-label="월급 루팡 가이드">
@@ -980,7 +991,7 @@
   </div>
 
   <!-- ==========================================
-       9. 달력 날짜 상세 모달 (날씨 정보 + 내 연차 삭제 연동)
+       9. 달력 날짜 상세 모달
        ========================================== -->
   <div class="modal-backdrop" id="cal-modal-backdrop"></div>
   <div class="cal-detail-modal" id="cal-detail-modal" role="dialog" aria-modal="true">
@@ -1010,7 +1021,6 @@
         <p class="info-value-desc" id="modal-info-desc">대한민국 공식 공휴일입니다.</p>
       </div>
 
-      <!-- 내 연차일 경우 삭제 버튼 행 -->
       <div class="modal-info-row" id="modal-my-leave-action-row" style="display: none; margin-top: 6px;">
         <button type="button" id="btn-delete-selected-leave" class="fb-submit-btn" style="background-color: var(--md-sys-color-error); padding: 9px 14px; font-size: 0.8125rem;">
           <span class="material-symbols-outlined" style="font-size: 16px;">delete</span>
@@ -1064,7 +1074,7 @@
   </div>
 
   <!-- ==========================================
-       11. 로그인 & 회원가입 & 게스트 진입 모달
+       11. 로그인 & 회원가입 모달
        ========================================== -->
   <div class="modal-backdrop" id="auth-modal-backdrop"></div>
   <div class="cal-detail-modal auth-modal-card" id="auth-modal" role="dialog" aria-modal="true">
@@ -1082,7 +1092,6 @@
     </div>
 
     <div class="modal-body">
-      <!-- 1) 로그인 폼 -->
       <form id="auth-login-form" class="feedback-form-content">
         <div class="form-group-item">
           <label for="login-id" class="fb-label">아이디</label>
@@ -1105,7 +1114,6 @@
         </div>
       </form>
 
-      <!-- 2) 회원가입 폼 -->
       <form id="auth-signup-form" class="feedback-form-content" style="display: none;">
         <div class="form-group-item">
           <label for="signup-id" class="fb-label">아이디</label>
@@ -1140,7 +1148,50 @@
     </div>
   </div>
 
-  <!-- 좌측 하단 테마 모드 전환 컨트롤러 -->
+  <!-- ==========================================
+       🌟 12. 비밀번호 변경 전용 모달
+       ========================================== -->
+  <div class="modal-backdrop" id="pw-change-modal-backdrop"></div>
+  <div class="cal-detail-modal auth-modal-card" id="pw-change-modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <span class="material-symbols-outlined modal-icon" style="color: var(--md-sys-color-primary);">lock_reset</span>
+        <div>
+          <h3 class="modal-date">비밀번호 변경</h3>
+          <span class="modal-status-badge normal">보안 설정</span>
+        </div>
+      </div>
+      <button type="button" class="md-icon-button modal-close-btn" id="btn-close-pw-change" aria-label="닫기">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <form id="pw-change-form" class="feedback-form-content">
+        <div class="form-group-item">
+          <label for="current-password" class="fb-label">현재 비밀번호</label>
+          <input type="password" id="current-password" class="fb-select" placeholder="현재 비밀번호를 입력하세요" required autocomplete="current-password" />
+        </div>
+
+        <div class="form-group-item">
+          <label for="new-password" class="fb-label">새 비밀번호</label>
+          <input type="password" id="new-password" class="fb-select" placeholder="새 비밀번호를 입력하세요" required autocomplete="new-password" />
+        </div>
+
+        <div class="form-group-item">
+          <label for="new-password-confirm" class="fb-label">새 비밀번호 재확인</label>
+          <input type="password" id="new-password-confirm" class="fb-select" placeholder="새 비밀번호를 한번 더 입력하세요" required autocomplete="new-password" />
+        </div>
+
+        <button type="submit" id="btn-pw-change-submit" class="fb-submit-btn" style="margin-top: 4px;">
+          <span class="material-symbols-outlined" style="font-size: 18px;">check_circle</span>
+          <span id="pw-change-btn-text">비밀번호 변경 완료</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 테마 모드 전환 FAB -->
   <aside class="theme-switcher-fab left-fab" id="theme-switcher-fab">
     <div class="theme-menu" id="theme-menu">
       <button type="button" class="theme-option" data-theme-value="light">
@@ -1161,7 +1212,7 @@
     </button>
   </aside>
 
-  <!-- 우측 하단 플로팅 피드백 버튼 (최상단 노출 / 스크롤 시 상단 바로 이동) -->
+  <!-- 우측 하단 플로팅 피드백 버튼 -->
   <button type="button" class="feedback-fab right-fab" id="btn-feedback-fab" aria-label="피드백 작성" title="피드백 작성">
     <span class="material-symbols-outlined">chat</span>
     <span class="fab-text">피드백</span>
