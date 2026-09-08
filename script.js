@@ -3,6 +3,8 @@
 // ==========================================
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxyLX-M_XVv8_9TiIEZ9mmHaKyGz4XHE_bcwyMGWnms5fs6G-gfW6nwghUoxpFB1cL58g/exec';
 
+const SESSION_DURATION_MS = 24 * 60 * 60 * 1000; // 🌟 24시간 세션 유효 기간
+
 const holidayMap = new Map();
 const fetchedYears = new Set();
 const weatherMap = new Map(); // 날씨 캐시 맵
@@ -50,6 +52,20 @@ const WIDGET_META = {
   vacation: { name: "🌴 가성비 연차 추천" },
   travel: { name: "✈️ 황금연휴 해외여행 추천" }
 };
+
+// 🌟 날짜 문자열 안전 정규화 헬퍼 (영문 표준시 문자열 등 어떤 포맷이든 YYYY-MM-DD로 변환)
+function normalizeDateString(val) {
+  if (!val) return '';
+  const str = String(val).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+    return str;
+  }
+  const d = new Date(str);
+  if (!isNaN(d.getTime())) {
+    return formatDateKey(d);
+  }
+  return str;
+}
 
 function formatDateKey(d) {
   const year = d.getFullYear();
@@ -336,9 +352,12 @@ function initGlobalHistoryAndEscListener() {
   });
 
   window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && modalHistoryStack.length > 0) {
-      const topModal = modalHistoryStack[modalHistoryStack.length - 1];
-      closeModalView(topModal.modalId);
+    if (e.key === "Escape") {
+      closeProfilePopup();
+      if (modalHistoryStack.length > 0) {
+        const topModal = modalHistoryStack[modalHistoryStack.length - 1];
+        closeModalView(topModal.modalId);
+      }
     }
   });
 
@@ -577,6 +596,7 @@ function initNavigationAndDrawers() {
   const slackingBackdrop = document.getElementById("slacking-drawer-backdrop");
 
   openNavBtn.addEventListener("click", () => {
+    closeProfilePopup();
     const navDrawer = document.getElementById("nav-drawer");
     if (navDrawer.classList.contains("is-open")) {
       closeModalView("nav-drawer");
@@ -818,15 +838,73 @@ function initFeedbackSystem() {
 }
 
 // ==========================================
-// 9. 로그인 / 회원가입 / 게스트 모드 시스템
+// 9. 세션 만료 & 로그인 / 프로필 팝업 / 비밀번호 변경 시스템
 // ==========================================
+// 🌟 24시간 세션 만료 자동 체크 함수
+function checkSessionExpiration() {
+  const user = localStorage.getItem("app_user");
+  const loginTime = localStorage.getItem("app_user_login_time");
+
+  if (user) {
+    if (!loginTime) {
+      localStorage.setItem("app_user_login_time", Date.now().toString());
+      return false;
+    }
+    const elapsed = Date.now() - Number(loginTime);
+    if (elapsed > SESSION_DURATION_MS) {
+      localStorage.removeItem("app_user");
+      localStorage.removeItem("app_user_login_time");
+      localStorage.setItem("app_is_guest", "true");
+      userLeavesMap.clear();
+      userLeavesList = [];
+      closeProfilePopup();
+      alert("로그인 후 24시간이 경과하여 보안을 위해 자동으로 로그아웃되었습니다.");
+      updateAuthUI();
+      refreshAllCalendars();
+      return true;
+    }
+  }
+  return false;
+}
+
 function getCurrentUser() {
   try {
+    if (checkSessionExpiration()) return null;
     const saved = localStorage.getItem("app_user");
     return saved ? JSON.parse(saved) : null;
   } catch (e) {
     return null;
   }
+}
+
+function openProfilePopup() {
+  const user = getCurrentUser();
+  if (!user) return;
+
+  const popup = document.getElementById("profile-popup");
+  const backdrop = document.getElementById("profile-popup-backdrop");
+  const nameEl = document.getElementById("popup-user-name");
+  const idEl = document.getElementById("popup-user-id");
+
+  if (nameEl) nameEl.innerText = `${user.name || user.id} 님`;
+  if (idEl) idEl.innerText = `아이디: ${user.id}`;
+
+  // 🌟 백드롭이 상단바(1100) 위를 덮지 않도록 z-index를 강제 조정해 클릭 막힘 원천 차단
+  if (backdrop) {
+    backdrop.style.zIndex = "1050";
+    backdrop.classList.add("is-open");
+  }
+  if (popup) {
+    popup.style.zIndex = "1200";
+    popup.classList.add("is-open");
+  }
+}
+
+function closeProfilePopup() {
+  const popup = document.getElementById("profile-popup");
+  const backdrop = document.getElementById("profile-popup-backdrop");
+  if (popup) popup.classList.remove("is-open");
+  if (backdrop) backdrop.classList.remove("is-open");
 }
 
 function updateAuthUI() {
@@ -900,25 +978,68 @@ function initAuthSystem() {
   if (switchToSignupBtn) switchToSignupBtn.addEventListener("click", showSignupForm);
   if (switchToLoginBtn) switchToLoginBtn.addEventListener("click", showLoginForm);
 
+  // 🌟 상단 우측 버튼 터치: 로그인 상태면 프로필 팝업 토글, 게스트면 로그인 모달 오픈
   if (topUserBtn) {
-    topUserBtn.addEventListener("click", () => {
+    topUserBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
       const user = getCurrentUser();
       if (user) {
-        if (confirm(`${user.name || user.id}님으로 로그인되어 있습니다.\n로그아웃 하시겠습니까?`)) {
-          handleLogout();
+        const popup = document.getElementById("profile-popup");
+        if (popup && popup.classList.contains("is-open")) {
+          closeProfilePopup();
+        } else {
+          openProfilePopup();
         }
       } else {
+        closeProfilePopup();
         showLoginForm();
         openModalView("auth-modal", "auth-modal-backdrop");
       }
     });
   }
 
+  // 🌟 전역 이벤트 위임(Event Delegation)으로 로그아웃 및 비밀번호 변경 클릭 보장
+  document.addEventListener("click", (e) => {
+    // 1) 로그아웃 버튼 터치 감지
+    const logoutBtn = e.target.closest("#btn-popup-logout");
+    if (logoutBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      closeProfilePopup();
+      if (confirm("로그아웃 하시겠습니까?")) {
+        handleLogout();
+      }
+      return;
+    }
+
+    // 2) 비밀번호 변경 버튼 터치 감지
+    const changePwBtn = e.target.closest("#btn-popup-change-pw");
+    if (changePwBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      closeProfilePopup();
+      const pwForm = document.getElementById("pw-change-form");
+      if (pwForm) pwForm.reset();
+      openModalView("pw-change-modal", "pw-change-modal-backdrop");
+      return;
+    }
+
+    // 3) 프로필 팝업 바깥 터치 시 닫기
+    const popup = document.getElementById("profile-popup");
+    const backdrop = document.getElementById("profile-popup-backdrop");
+    if (popup && popup.classList.contains("is-open")) {
+      if (e.target === backdrop || (!popup.contains(e.target) && topUserBtn && !topUserBtn.contains(e.target))) {
+        closeProfilePopup();
+      }
+    }
+  });
+
   if (navAuthBtn) {
     navAuthBtn.addEventListener("click", () => {
       const user = getCurrentUser();
       if (user) {
         if (confirm("로그아웃 하시겠습니까?")) {
+          closeModalView("nav-drawer");
           handleLogout();
         }
       } else {
@@ -934,6 +1055,7 @@ function initAuthSystem() {
   if (guestLoginBtn) {
     guestLoginBtn.addEventListener("click", () => {
       localStorage.removeItem("app_user");
+      localStorage.removeItem("app_user_login_time");
       localStorage.setItem("app_is_guest", "true");
       userLeavesMap.clear();
       userLeavesList = [];
@@ -989,6 +1111,7 @@ function initAuthSystem() {
 
         if (result.status === "success" && result.user) {
           localStorage.setItem("app_user", JSON.stringify(result.user));
+          localStorage.setItem("app_user_login_time", Date.now().toString()); // 🌟 로그인 시점 기록
           localStorage.removeItem("app_is_guest");
           updateAuthUI();
           loginForm.reset();
@@ -1080,14 +1203,104 @@ function initAuthSystem() {
   }
 }
 
-function handleLogout() {
+function handleLogout(isSilent = false) {
   localStorage.removeItem("app_user");
+  localStorage.removeItem("app_user_login_time");
   localStorage.setItem("app_is_guest", "true");
   userLeavesMap.clear();
   userLeavesList = [];
+  closeProfilePopup();
   updateAuthUI();
   refreshAllCalendars();
-  alert("로그아웃 되었습니다.");
+  if (!isSilent) {
+    alert("로그아웃 되었습니다.");
+  }
+}
+
+// 🌟 비밀번호 변경 폼 처리 엔진
+function initPasswordChangeForm() {
+  const form = document.getElementById("pw-change-form");
+  const closeBtn = document.getElementById("btn-close-pw-change");
+  const backdrop = document.getElementById("pw-change-modal-backdrop");
+  const submitBtn = document.getElementById("btn-pw-change-submit");
+  const btnText = document.getElementById("pw-change-btn-text");
+
+  if (closeBtn) closeBtn.addEventListener("click", () => closeModalView("pw-change-modal"));
+  if (backdrop) backdrop.addEventListener("click", () => closeModalView("pw-change-modal"));
+
+  if (form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const user = getCurrentUser();
+      if (!user) {
+        alert("로그인 세션이 만료되었습니다. 다시 로그인해주세요.");
+        closeModalView("pw-change-modal");
+        return;
+      }
+
+      const currentPw = (document.getElementById("current-password").value || '').trim();
+      const newPw = (document.getElementById("new-password").value || '').trim();
+      const confirmPw = (document.getElementById("new-password-confirm").value || '').trim();
+
+      if (!currentPw || !newPw || !confirmPw) {
+        alert("모든 입력 항목을 채워주세요.");
+        return;
+      }
+
+      if (newPw !== confirmPw) {
+        alert("새 비밀번호가 일치하지 않습니다. 다시 확인해주세요.");
+        document.getElementById("new-password-confirm").focus();
+        return;
+      }
+
+      if (currentPw === newPw) {
+        alert("현재 비밀번호와 다른 새로운 비밀번호를 입력해주세요.");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      const originText = btnText ? btnText.innerText : "비밀번호 변경 완료";
+      if (btnText) btnText.innerText = "변경 처리 중...";
+
+      try {
+        const response = await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "changePassword",
+            userId: user.id,
+            currentPassword: currentPw,
+            newPassword: newPw
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.status === "success") {
+          alert("비밀번호가 성공적으로 변경되었습니다. 보안을 위해 다시 로그인해주세요.");
+          form.reset();
+          closeModalView("pw-change-modal");
+          handleLogout(true);
+          setTimeout(() => {
+            const loginForm = document.getElementById("auth-login-form");
+            const signupForm = document.getElementById("auth-signup-form");
+            if (loginForm && signupForm) {
+              loginForm.style.display = "flex";
+              signupForm.style.display = "none";
+            }
+            openModalView("auth-modal", "auth-modal-backdrop");
+          }, 200);
+        } else {
+          alert("비밀번호 변경 실패: " + (result.message || "현재 비밀번호를 확인해주세요."));
+        }
+      } catch (err) {
+        console.error("비밀번호 변경 오류:", err);
+        alert("네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+      } finally {
+        submitBtn.disabled = false;
+        if (btnText) btnText.innerText = originText;
+      }
+    });
+  }
 }
 
 // ==========================================
@@ -1107,7 +1320,12 @@ async function loadUserLeaves(userId) {
     const result = await response.json();
     if (result.status === "success" && Array.isArray(result.data)) {
       userLeavesMap.clear();
-      userLeavesList = result.data;
+      // 🌟 날짜를 YYYY-MM-DD 형식으로 안전 정규화
+      userLeavesList = result.data.map(item => ({
+        ...item,
+        date: normalizeDateString(item.date)
+      }));
+
       userLeavesList.forEach(leave => {
         userLeavesMap.set(leave.date, leave);
       });
@@ -1192,16 +1410,24 @@ function renderMyLeaveRegisteredList() {
     if (item.type.includes("반차")) typeClass = "type-half";
     else if (item.type === "공가") typeClass = "type-official";
 
-    const [y, m, d] = item.date.split("-");
-    const dateObj = new Date(Number(y), Number(m) - 1, Number(d));
-    const formattedDate = formatDateMD(dateObj);
+    const cleanDate = normalizeDateString(item.date);
+    let dayNameText = "";
+
+    const parts = cleanDate.split("-");
+    if (parts.length === 3) {
+      const dateObj = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+      if (!isNaN(dateObj.getTime())) {
+        const dayName = ['일', '월', '화', '수', '목', '금', '토'][dateObj.getDay()];
+        dayNameText = `(${dayName})`;
+      }
+    }
 
     return `
       <div class="my-leave-card-item">
         <div class="my-leave-card-left">
           <div class="my-leave-badge-row">
             <span class="my-leave-type-badge ${typeClass}">${item.type}</span>
-            <strong style="font-size: 0.8125rem; color: var(--md-sys-color-primary);">${item.date} (${formattedDate.split('(')[1]}</strong>
+            <strong style="font-size: 0.8125rem; color: var(--md-sys-color-primary);">${cleanDate} ${dayNameText}</strong>
           </div>
           <strong class="my-leave-title">${item.title}</strong>
           ${item.content ? `<p class="my-leave-desc">${item.content}</p>` : ''}
@@ -1261,6 +1487,8 @@ function openLeaveRegisterModal(cellDate, dateKey) {
     return;
   }
 
+  const cleanDateKey = normalizeDateString(dateKey);
+
   const dateInput = document.getElementById("leave-reg-date");
   const leaveIdInput = document.getElementById("leave-reg-id");
   const dateTitle = document.getElementById("leave-reg-modal-date");
@@ -1276,12 +1504,11 @@ function openLeaveRegisterModal(cellDate, dateKey) {
   const deleteBtn = document.getElementById("btn-leave-reg-delete");
 
   const dayName = ['일', '월', '화', '수', '목', '금', '토'][cellDate.getDay()];
-  if (dateInput) dateInput.value = dateKey;
+  if (dateInput) dateInput.value = cleanDateKey;
   if (dateTitle) dateTitle.innerText = `${cellDate.getFullYear()}년 ${cellDate.getMonth() + 1}월 ${cellDate.getDate()}일 (${dayName})`;
 
-  // 🌟 이미 내 연차로 등록된 날을 터치한 경우 -> 수정 & 삭제 모드
-  if (userLeavesMap.has(dateKey)) {
-    const existing = userLeavesMap.get(dateKey);
+  if (userLeavesMap.has(cleanDateKey)) {
+    const existing = userLeavesMap.get(cleanDateKey);
     if (leaveIdInput) leaveIdInput.value = existing.id || "";
     if (typeSelect) typeSelect.value = existing.type || "연차";
     if (titleInput) titleInput.value = existing.title || "";
@@ -1292,13 +1519,11 @@ function openLeaveRegisterModal(cellDate, dateKey) {
     if (submitBtnText) submitBtnText.innerText = "연차 수정하기";
     if (submitBtnIcon) submitBtnIcon.innerText = "edit";
 
-    // 삭제 버튼 노출 및 ID 연결
     if (deleteBtn) {
       deleteBtn.style.display = "inline-flex";
       deleteBtn.dataset.leaveId = existing.id;
     }
   } else {
-    // 🌟 신규 연차 등록 모드
     if (leaveIdInput) leaveIdInput.value = "";
     if (typeSelect) typeSelect.value = "연차";
     if (titleInput) titleInput.value = "";
@@ -1309,7 +1534,6 @@ function openLeaveRegisterModal(cellDate, dateKey) {
     if (submitBtnText) submitBtnText.innerText = "연차 등록하기";
     if (submitBtnIcon) submitBtnIcon.innerText = "check_circle";
 
-    // 삭제 버튼 숨김
     if (deleteBtn) {
       deleteBtn.style.display = "none";
       deleteBtn.dataset.leaveId = "";
@@ -1330,7 +1554,6 @@ function initLeaveRegisterForm() {
   const prevBtn = document.getElementById("my-leave-cal-prev");
   const nextBtn = document.getElementById("my-leave-cal-next");
 
-  // 🌟 연차 추가 달력 이전/이후 위아래 슬라이딩 애니메이션 핸들러
   if (prevBtn) {
     prevBtn.addEventListener("click", () => {
       if (isMyLeaveCalendarSliding) return;
@@ -1358,7 +1581,6 @@ function initLeaveRegisterForm() {
   if (closeBtn) closeBtn.addEventListener("click", () => closeModalView("leave-reg-modal"));
   if (backdrop) backdrop.addEventListener("click", () => closeModalView("leave-reg-modal"));
 
-  // 🌟 모달 내 "연차 삭제하기" 버튼 클릭 이벤트
   if (deleteBtn) {
     deleteBtn.addEventListener("click", async () => {
       const leaveId = deleteBtn.dataset.leaveId;
@@ -1373,7 +1595,6 @@ function initLeaveRegisterForm() {
     });
   }
 
-  // 연차 등록 / 수정 폼 제출
   if (form) {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -1383,7 +1604,8 @@ function initLeaveRegisterForm() {
         return;
       }
 
-      const dateStr = document.getElementById("leave-reg-date").value;
+      const rawDateStr = document.getElementById("leave-reg-date").value;
+      const dateStr = normalizeDateString(rawDateStr);
       const type = document.getElementById("leave-reg-type").value;
       const title = document.getElementById("leave-reg-title").value.trim();
       const content = document.getElementById("leave-reg-content").value.trim();
@@ -1413,13 +1635,18 @@ function initLeaveRegisterForm() {
         const result = await response.json();
 
         if (result.status === "success" && result.leave) {
-          userLeavesList = userLeavesList.filter(l => l.date !== dateStr);
-          userLeavesList.push(result.leave);
-          userLeavesMap.set(dateStr, result.leave);
+          const cleanLeave = {
+            ...result.leave,
+            date: normalizeDateString(result.leave.date)
+          };
+
+          userLeavesList = userLeavesList.filter(l => l.date !== cleanLeave.date);
+          userLeavesList.push(cleanLeave);
+          userLeavesMap.set(cleanLeave.date, cleanLeave);
 
           refreshAllCalendars();
           closeModalView("leave-reg-modal");
-          alert(`${dateStr} 연차가 성공적으로 저장되었습니다!`);
+          alert(`${cleanLeave.date} 연차가 성공적으로 저장되었습니다!`);
         } else {
           alert("등록 실패: " + (result.message || "다시 시도해주세요."));
         }
@@ -2103,6 +2330,7 @@ function createCalendarGridFragment(year, month, isLeaveRegisterMode = false) {
     `;
 
     cell.addEventListener("click", () => {
+      closeProfilePopup();
       if (isLeaveRegisterMode) {
         openLeaveRegisterModal(cellDate, dateKey);
       } else {
@@ -2453,7 +2681,7 @@ function setupSimCalendarControls() {
 }
 
 // ==========================================
-// 18. 점심 메뉴 추천 엔진[span_2](start_span)[span_2](end_span)
+// 18. 점심 메뉴 추천 엔진
 // ==========================================
 const lunchDatabase = [
   // 1. 한식 (Korean)
@@ -2623,7 +2851,7 @@ function setupLunchEngine() {
 }
 
 // ==========================================
-// 19. 루팡 급여 계산기 & 컴팩트 인디케이터 모듈[span_3](start_span)[span_3](end_span)
+// 19. 루팡 급여 계산기 & 컴팩트 인디케이터 모듈
 // ==========================================
 let slackTimerInterval = null;
 let slackSeconds = 0;
@@ -2778,7 +3006,7 @@ function setupSlackingEngine() {
 }
 
 // ==========================================
-// 20. 앱 초기화[span_4](start_span)[span_4](end_span)
+// 20. 앱 초기화
 // ==========================================
 async function init() {
   initThemeManager();
@@ -2792,6 +3020,10 @@ async function init() {
   setupSlackingEngine();
   initWidgetOrderManager();
   initLeaveRegisterForm();
+  initPasswordChangeForm(); // 🌟 비밀번호 변경 모달 이벤트 리스너
+
+  // 🌟 세션 24시간 만료 여부 1차 체크
+  checkSessionExpiration();
 
   // 로그인 상태라면 사용자 연차 데이터 사전 로드
   const currentUser = getCurrentUser();
@@ -2802,6 +3034,9 @@ async function init() {
   await renderMainRealtimeSpace();
   updateCountdown();
   setInterval(updateCountdown, 1000);
+
+  // 🌟 1분마다 세션 만료 검사
+  setInterval(checkSessionExpiration, 60000);
 
   hideLoadingScreen();
   setTimeout(checkAndApplyTitleMarquee, 200);
