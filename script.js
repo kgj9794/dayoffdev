@@ -53,6 +53,27 @@ const WIDGET_META = {
   travel: { name: "✈️ 황금연휴 해외여행 추천" }
 };
 
+// 🌟 전역 토스트 알림 헬퍼 함수
+function showToast(message, icon = "info") {
+  const container = document.getElementById("toast-container");
+  if (!container) return;
+
+  const toast = document.createElement("div");
+  toast.className = "toast-item";
+  toast.innerHTML = `
+    <span class="material-symbols-outlined toast-icon">${icon}</span>
+    <span class="toast-message">${message}</span>
+  `;
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.classList.add("is-hiding");
+    setTimeout(() => {
+      toast.remove();
+    }, 260);
+  }, 3000);
+}
+
 // 🌟 날짜 문자열 안전 정규화 헬퍼 (영문 표준시 문자열 등 어떤 포맷이든 YYYY-MM-DD로 변환)
 function normalizeDateString(val) {
   if (!val) return '';
@@ -506,7 +527,7 @@ function initWidgetOrderManager() {
 }
 
 // ==========================================
-// 5. 출근/퇴근 시간 설정
+// 5. 출근/퇴근 시간 관리 & 개인정보 변경 모달
 // ==========================================
 function getStartWorkTime() {
   const saved = localStorage.getItem("app_start_work_time") || "08:00";
@@ -528,58 +549,152 @@ function getOffWorkTime() {
   };
 }
 
-function setupWorkTimeInputs() {
-  const startInput = document.getElementById("start-work-time");
-  const offInput = document.getElementById("off-work-time");
-  const chips = document.querySelectorAll(".target-time-chip");
-
-  const currentStart = getStartWorkTime();
-  if (startInput) {
-    startInput.value = currentStart.str;
-    startInput.addEventListener("change", (e) => {
-      if (!e.target.value) return;
-      localStorage.setItem("app_start_work_time", e.target.value);
-      updateCountdown();
-    });
+// 🌟 카운트다운 위젯 내 출퇴근 시간 텍스트 배지 실시간 갱신
+function updateWorkTimeDisplay() {
+  const textEl = document.getElementById("countdown-work-time-text");
+  if (textEl) {
+    const start = getStartWorkTime().str;
+    const off = getOffWorkTime().str;
+    textEl.innerText = `출근 ${start} · 퇴근 ${off}`;
   }
+}
 
-  const currentOff = getOffWorkTime();
-  if (offInput) {
-    offInput.value = currentOff.str;
-    offInput.addEventListener("change", (e) => {
-      if (!e.target.value) return;
-      localStorage.setItem("app_off_work_time", e.target.value);
-      updateCountdown();
+// 🌟 로그인 사용자의 출퇴근 시간 설정을 구글 시트 DB로 비동기 저장
+async function syncWorkTimeToServer() {
+  const user = getCurrentUser();
+  if (!user) return;
+
+  const { str: startStr } = getStartWorkTime();
+  const { str: offStr } = getOffWorkTime();
+
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "updateWorkTime",
+        userId: user.id,
+        startWorkTime: startStr,
+        offWorkTime: offStr
+      })
     });
+  } catch (err) {
+    console.warn("출퇴근 시간 DB 동기화 실패:", err);
   }
+}
 
-  chips.forEach(chip => {
-    chip.addEventListener("click", (e) => {
-      const input = chip.querySelector(".time-input-inline");
-      if (input && e.target !== input) {
-        try {
-          if (typeof input.showPicker === 'function') {
-            input.showPicker();
-          } else {
-            input.focus();
-          }
-        } catch (err) {
-          input.focus();
-        }
+// 🌟 개인정보 변경 모달 즉시 열기 (로그인 검증 및 기본값 채우기)
+function openProfileEditModalDirectly() {
+  const user = getCurrentUser();
+  if (!user) {
+    alert("근무 시간 설정은 로그인 후 이용하실 수 있습니다.");
+    setTimeout(() => {
+      const loginForm = document.getElementById("auth-login-form");
+      const signupForm = document.getElementById("auth-signup-form");
+      if (loginForm && signupForm) {
+        loginForm.style.display = "flex";
+        signupForm.style.display = "none";
       }
+      openModalView("auth-modal", "auth-modal-backdrop");
+    }, 150);
+    return;
+  }
+
+  const startInput = document.getElementById("edit-start-work-time");
+  const offInput = document.getElementById("edit-off-work-time");
+  if (startInput) startInput.value = getStartWorkTime().str;
+  if (offInput) offInput.value = getOffWorkTime().str;
+
+  openModalView("profile-edit-modal", "profile-edit-modal-backdrop");
+}
+
+// 🌟 프로필 > 개인정보 변경 모달 제어 엔진
+function initProfileEditModal() {
+  const form = document.getElementById("profile-edit-form");
+  const closeBtn = document.getElementById("btn-close-profile-edit");
+  const backdrop = document.getElementById("profile-edit-modal-backdrop");
+  const submitBtn = document.getElementById("btn-profile-edit-submit");
+  const btnText = document.getElementById("profile-edit-btn-text");
+
+  if (closeBtn) closeBtn.addEventListener("click", () => closeModalView("profile-edit-modal"));
+  if (backdrop) backdrop.addEventListener("click", () => closeModalView("profile-edit-modal"));
+
+  if (form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const startVal = document.getElementById("edit-start-work-time").value;
+      const offVal = document.getElementById("edit-off-work-time").value;
+
+      if (!startVal || !offVal) {
+        alert("출근 시간과 퇴근 시간을 모두 입력해주세요.");
+        return;
+      }
+
+      localStorage.setItem("app_start_work_time", startVal);
+      localStorage.setItem("app_off_work_time", offVal);
+
+      updateWorkTimeDisplay();
+      updateCountdown();
+
+      submitBtn.disabled = true;
+      if (btnText) btnText.innerText = "저장 중...";
+
+      await syncWorkTimeToServer();
+
+      submitBtn.disabled = false;
+      if (btnText) btnText.innerText = "근무 시간 저장";
+
+      closeModalView("profile-edit-modal");
+      showToast("근무 시간이 성공적으로 저장되었습니다.", "schedule");
     });
-  });
+  }
 }
 
 // ==========================================
 // 6. 네비게이션 드로어 & 모달 이벤트 등록
 // ==========================================
+function openMyLeaveDrawer() {
+  const user = getCurrentUser();
+  if (!user) {
+    alert("연차 추가 및 관리 기능은 로그인 후 이용하실 수 있습니다.");
+    const navDrawer = document.getElementById("nav-drawer");
+    if (navDrawer && navDrawer.classList.contains("is-open")) {
+      closeModalView("nav-drawer");
+    }
+    setTimeout(() => {
+      const loginForm = document.getElementById("auth-login-form");
+      const signupForm = document.getElementById("auth-signup-form");
+      if (loginForm && signupForm) {
+        loginForm.style.display = "flex";
+        signupForm.style.display = "none";
+      }
+      openModalView("auth-modal", "auth-modal-backdrop");
+    }, 200);
+    return;
+  }
+
+  const navDrawer = document.getElementById("nav-drawer");
+  const onDrawerOpen = () => {
+    myLeaveViewYear = currentRealYear;
+    myLeaveViewMonth = currentRealMonth;
+    renderMyLeaveCalendar("none");
+    renderMyLeaveRegisteredList();
+  };
+
+  if (navDrawer && navDrawer.classList.contains("is-open")) {
+    transitionModalView("nav-drawer", "my-leave-drawer", "my-leave-drawer-backdrop", onDrawerOpen);
+  } else {
+    openModalView("my-leave-drawer", "my-leave-drawer-backdrop", onDrawerOpen);
+  }
+}
+
 function initNavigationAndDrawers() {
   const openNavBtn = document.getElementById("btn-open-nav-menu");
   const closeNavBtn = document.getElementById("btn-close-nav-menu");
   const navBackdrop = document.getElementById("nav-drawer-backdrop");
 
   const openMyLeaveBtn = document.getElementById("menu-open-my-leaves");
+  const mainAddLeaveBtn = document.getElementById("btn-main-add-leave");
+  const editWorkTimeBtn = document.getElementById("btn-edit-work-time"); // 🌟 카운트다운 연필 버튼
   const closeMyLeaveBtn = document.getElementById("btn-close-my-leave");
   const myLeaveBackdrop = document.getElementById("my-leave-drawer-backdrop");
 
@@ -608,31 +723,16 @@ function initNavigationAndDrawers() {
   closeNavBtn.addEventListener("click", () => closeModalView("nav-drawer"));
   navBackdrop.addEventListener("click", () => closeModalView("nav-drawer"));
 
-  // 연차 추가하기 메뉴 클릭 처리 (로그인 여부 검증)
-  if (openMyLeaveBtn) {
-    openMyLeaveBtn.addEventListener("click", () => {
-      const user = getCurrentUser();
-      if (!user) {
-        alert("연차 추가 및 관리 기능은 로그인 후 이용하실 수 있습니다.");
-        closeModalView("nav-drawer");
-        setTimeout(() => {
-          const loginForm = document.getElementById("auth-login-form");
-          const signupForm = document.getElementById("auth-signup-form");
-          if (loginForm && signupForm) {
-            loginForm.style.display = "flex";
-            signupForm.style.display = "none";
-          }
-          openModalView("auth-modal", "auth-modal-backdrop");
-        }, 200);
-        return;
-      }
+  // 1) 사이드 메뉴 '연차 추가하기' 클릭
+  if (openMyLeaveBtn) openMyLeaveBtn.addEventListener("click", openMyLeaveDrawer);
 
-      transitionModalView("nav-drawer", "my-leave-drawer", "my-leave-drawer-backdrop", () => {
-        myLeaveViewYear = currentRealYear;
-        myLeaveViewMonth = currentRealMonth;
-        renderMyLeaveCalendar("none");
-        renderMyLeaveRegisteredList();
-      });
+  // 2) 메인 화면 '이번 달 달력' 우측 상단 '+' 버튼 클릭
+  if (mainAddLeaveBtn) mainAddLeaveBtn.addEventListener("click", openMyLeaveDrawer);
+
+  // 3) 🌟 메인 화면 '카운트다운' 우측 상단 '연필' 버튼 클릭 -> 개인정보 변경(근무 시간 설정) 팝업 오픈!
+  if (editWorkTimeBtn) {
+    editWorkTimeBtn.addEventListener("click", () => {
+      openProfileEditModalDirectly();
     });
   }
 
@@ -709,7 +809,6 @@ function openCalendarDetailModal(cellDate, dateKey, isHoliday, isLeave, isToday,
     weatherBox.style.display = "none";
   }
 
-  // 사용자가 등록한 연차인 경우
   if (userLeavesMap.has(dateKey)) {
     const myLeave = userLeavesMap.get(dateKey);
     iconEl.innerText = "beach_access";
@@ -840,7 +939,6 @@ function initFeedbackSystem() {
 // ==========================================
 // 9. 세션 만료 & 로그인 / 프로필 팝업 / 비밀번호 변경 시스템
 // ==========================================
-// 🌟 24시간 세션 만료 자동 체크 함수
 function checkSessionExpiration() {
   const user = localStorage.getItem("app_user");
   const loginTime = localStorage.getItem("app_user_login_time");
@@ -889,7 +987,6 @@ function openProfilePopup() {
   if (nameEl) nameEl.innerText = `${user.name || user.id} 님`;
   if (idEl) idEl.innerText = `아이디: ${user.id}`;
 
-  // 🌟 백드롭이 상단바(1100) 위를 덮지 않도록 z-index를 강제 조정해 클릭 막힘 원천 차단
   if (backdrop) {
     backdrop.style.zIndex = "1050";
     backdrop.classList.add("is-open");
@@ -978,7 +1075,6 @@ function initAuthSystem() {
   if (switchToSignupBtn) switchToSignupBtn.addEventListener("click", showSignupForm);
   if (switchToLoginBtn) switchToLoginBtn.addEventListener("click", showLoginForm);
 
-  // 🌟 상단 우측 버튼 터치: 로그인 상태면 프로필 팝업 토글, 게스트면 로그인 모달 오픈
   if (topUserBtn) {
     topUserBtn.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -998,17 +1094,14 @@ function initAuthSystem() {
     });
   }
 
-  // 🌟 전역 이벤트 위임(Event Delegation)으로 로그아웃 및 비밀번호 변경 클릭 보장
   document.addEventListener("click", (e) => {
-    // 1) 로그아웃 버튼 터치 감지
-    const logoutBtn = e.target.closest("#btn-popup-logout");
-    if (logoutBtn) {
+    // 1) 🌟 개인정보 변경 버튼 터치 감지
+    const editProfileBtn = e.target.closest("#btn-popup-edit-profile");
+    if (editProfileBtn) {
       e.preventDefault();
       e.stopPropagation();
       closeProfilePopup();
-      if (confirm("로그아웃 하시겠습니까?")) {
-        handleLogout();
-      }
+      openProfileEditModalDirectly();
       return;
     }
 
@@ -1024,7 +1117,19 @@ function initAuthSystem() {
       return;
     }
 
-    // 3) 프로필 팝업 바깥 터치 시 닫기
+    // 3) 로그아웃 버튼 터치 감지
+    const logoutBtn = e.target.closest("#btn-popup-logout");
+    if (logoutBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      closeProfilePopup();
+      if (confirm("로그아웃 하시겠습니까?")) {
+        handleLogout();
+      }
+      return;
+    }
+
+    // 4) 프로필 팝업 바깥 터치 시 닫기
     const popup = document.getElementById("profile-popup");
     const backdrop = document.getElementById("profile-popup-backdrop");
     if (popup && popup.classList.contains("is-open")) {
@@ -1111,15 +1216,26 @@ function initAuthSystem() {
 
         if (result.status === "success" && result.user) {
           localStorage.setItem("app_user", JSON.stringify(result.user));
-          localStorage.setItem("app_user_login_time", Date.now().toString()); // 🌟 로그인 시점 기록
+          localStorage.setItem("app_user_login_time", Date.now().toString());
           localStorage.removeItem("app_is_guest");
+
+          // 사용자별 출퇴근 시간 DB에서 동기화
+          if (result.user.startWorkTime) {
+            localStorage.setItem("app_start_work_time", result.user.startWorkTime);
+          }
+          if (result.user.offWorkTime) {
+            localStorage.setItem("app_off_work_time", result.user.offWorkTime);
+          }
+          updateWorkTimeDisplay();
+
           updateAuthUI();
           loginForm.reset();
           closeModalView("auth-modal");
 
           await loadUserLeaves(result.user.id);
           refreshAllCalendars();
-          alert(`${result.user.name}님, 환영합니다!`);
+
+          showToast(`${result.user.name}님, 환영합니다!`, "waving_hand");
         } else {
           alert("로그인 실패: " + (result.message || "아이디 또는 비밀번호를 확인해주세요."));
         }
@@ -1217,7 +1333,7 @@ function handleLogout(isSilent = false) {
   }
 }
 
-// 🌟 비밀번호 변경 폼 처리 엔진
+// 비밀번호 변경 폼 처리
 function initPasswordChangeForm() {
   const form = document.getElementById("pw-change-form");
   const closeBtn = document.getElementById("btn-close-pw-change");
@@ -1320,7 +1436,6 @@ async function loadUserLeaves(userId) {
     const result = await response.json();
     if (result.status === "success" && Array.isArray(result.data)) {
       userLeavesMap.clear();
-      // 🌟 날짜를 YYYY-MM-DD 형식으로 안전 정규화
       userLeavesList = result.data.map(item => ({
         ...item,
         date: normalizeDateString(item.date)
@@ -1341,9 +1456,9 @@ function refreshAllCalendars() {
   renderMyLeaveCalendar("none");
   renderMyLeaveRegisteredList();
   updateCountdown();
+  updateWorkTimeDisplay();
 }
 
-// 🌟 연차 추가하기 전용 캘린더 렌더링 (위/아래 슬라이딩 애니메이션 지원)
 function renderMyLeaveCalendar(direction = "none") {
   const monthYearEl = document.getElementById("my-leave-cal-month-year");
   const viewport = document.getElementById("my-leave-calendar-viewport");
@@ -1479,7 +1594,6 @@ async function executeDeleteUserLeave(leaveId) {
   }
 }
 
-// 🌟 날짜 터치 시 팝업 모달 오픈 (등록 vs 수정/삭제 모드 자동 분기)
 function openLeaveRegisterModal(cellDate, dateKey) {
   const user = getCurrentUser();
   if (!user) {
@@ -1772,6 +1886,13 @@ function isOffDay(dateObj) {
   return false;
 }
 
+function isPublicOffDay(dateObj) {
+  const day = dateObj.getDay();
+  if (day === 0 || day === 6) return true;
+  const dateStr = formatDateKey(dateObj);
+  return holidayMap.has(dateStr);
+}
+
 function getDayOffName(dateObj) {
   const dateStr = formatDateKey(dateObj);
   if (userLeavesMap.has(dateStr)) {
@@ -2010,10 +2131,10 @@ function updateCountdown() {
 // ==========================================
 // 14. 연차 추천 및 해외여행 추천 연산
 // ==========================================
-function countContiguousOffDays(startDate) {
+function countContiguousPublicOffDays(startDate) {
   let count = 0;
   let cur = new Date(startDate);
-  while (isOffDay(cur)) {
+  while (isPublicOffDay(cur)) {
     count++;
     cur.setDate(cur.getDate() + 1);
   }
@@ -2041,14 +2162,14 @@ function getMonthLeaveAnalysis(year, month) {
   
   let cur = new Date(startCheck);
   while (cur <= endCheck) {
-    if (isOffDay(cur)) {
+    if (isPublicOffDay(cur)) {
       const blockStart = new Date(cur);
       let blockEnd = new Date(cur);
 
       while (cur <= endCheck) {
         const next = new Date(cur);
         next.setDate(cur.getDate() + 1);
-        if (isOffDay(next)) {
+        if (isPublicOffDay(next)) {
           blockEnd = next;
           cur.setDate(cur.getDate() + 1);
         } else {
@@ -2063,31 +2184,41 @@ function getMonthLeaveAnalysis(year, month) {
       const gap2 = new Date(blockEnd);
       gap2.setDate(blockEnd.getDate() + 2);
 
-      if (!isOffDay(gap1) && isOffDay(gap2)) {
-        const nextBlockLen = countContiguousOffDays(gap2);
+      if (!isPublicOffDay(gap1) && isPublicOffDay(gap2)) {
+        const nextBlockLen = countContiguousPublicOffDays(gap2);
         const totalRest = blockLength + 1 + nextBlockLen;
-        leaveSet.add(formatDateKey(gap1));
-        if (gap1.getMonth() === month && gap1.getFullYear() === year) {
-          candidates.push({ leaveDate: gap1, totalRest });
+        const gap1Key = formatDateKey(gap1);
+
+        if (!userLeavesMap.has(gap1Key)) {
+          leaveSet.add(gap1Key);
+          if (gap1.getMonth() === month && gap1.getFullYear() === year) {
+            candidates.push({ leaveDate: gap1, totalRest });
+          }
         }
       }
 
       if (blockLength >= 3) {
         const dayBefore = new Date(blockStart);
         dayBefore.setDate(blockStart.getDate() - 1);
-        if (!isOffDay(dayBefore)) {
-          leaveSet.add(formatDateKey(dayBefore));
-          if (dayBefore.getMonth() === month && dayBefore.getFullYear() === year) {
-            candidates.push({ leaveDate: dayBefore, totalRest: blockLength + 1 });
+        if (!isPublicOffDay(dayBefore)) {
+          const dayBeforeKey = formatDateKey(dayBefore);
+          if (!userLeavesMap.has(dayBeforeKey)) {
+            leaveSet.add(dayBeforeKey);
+            if (dayBefore.getMonth() === month && dayBefore.getFullYear() === year) {
+              candidates.push({ leaveDate: dayBefore, totalRest: blockLength + 1 });
+            }
           }
         }
 
         const dayAfter = new Date(blockEnd);
         dayAfter.setDate(blockEnd.getDate() + 1);
-        if (!isOffDay(dayAfter)) {
-          leaveSet.add(formatDateKey(dayAfter));
-          if (dayAfter.getMonth() === month && dayAfter.getFullYear() === year) {
-            candidates.push({ leaveDate: dayAfter, totalRest: blockLength + 1 });
+        if (!isPublicOffDay(dayAfter)) {
+          const dayAfterKey = formatDateKey(dayAfter);
+          if (!userLeavesMap.has(dayAfterKey)) {
+            leaveSet.add(dayAfterKey);
+            if (dayAfter.getMonth() === month && dayAfter.getFullYear() === year) {
+              candidates.push({ leaveDate: dayAfter, totalRest: blockLength + 1 });
+            }
           }
         }
       }
@@ -2108,14 +2239,14 @@ function calculateVacationsForBase(baseDay) {
     const checkDate = new Date(baseDay);
     checkDate.setDate(baseDay.getDate() + i);
 
-    if (isOffDay(checkDate)) {
+    if (isPublicOffDay(checkDate)) {
       const blockStart = new Date(checkDate);
       let blockEnd = new Date(checkDate);
 
       while (i <= scanDays) {
         const nextDate = new Date(baseDay);
         nextDate.setDate(baseDay.getDate() + i + 1);
-        if (isOffDay(nextDate)) {
+        if (isPublicOffDay(nextDate)) {
           blockEnd = nextDate;
           i++;
         } else {
@@ -2131,53 +2262,62 @@ function calculateVacationsForBase(baseDay) {
       const gap2 = new Date(blockEnd);
       gap2.setDate(blockEnd.getDate() + 2);
 
-      if (!isOffDay(gap1) && isOffDay(gap2)) {
-        const nextBlockLen = countContiguousOffDays(gap2);
+      if (!isPublicOffDay(gap1) && isPublicOffDay(gap2)) {
+        const nextBlockLen = countContiguousPublicOffDays(gap2);
         const totalRest = blockLength + 1 + nextBlockLen;
         const finalEndDate = new Date(gap2);
         finalEndDate.setDate(finalEndDate.getDate() + nextBlockLen - 1);
+        const gap1Key = formatDateKey(gap1);
 
-        rawCandidates.push({
-          leaveDate: gap1,
-          title: `징검다리 연휴 (${holidayName} 연계)`,
-          leave: `${formatDateMD(gap1)} 연차 1일`,
-          benefit: `총 ${totalRest}일 연속 휴식 (${formatDateMD(blockStart)} ~ ${formatDateMD(finalEndDate)})`,
-          badge: `연차 1일 = ${totalRest}일 휴식`,
-          totalRest,
-          startDate: blockStart,
-          endDate: finalEndDate
-        });
+        if (!userLeavesMap.has(gap1Key)) {
+          rawCandidates.push({
+            leaveDate: gap1,
+            title: `징검다리 연휴 (${holidayName} 연계)`,
+            leave: `${formatDateMD(gap1)} 연차 1일`,
+            benefit: `총 ${totalRest}일 연속 휴식 (${formatDateMD(blockStart)} ~ ${formatDateMD(finalEndDate)})`,
+            badge: `연차 1일 = ${totalRest}일 휴식`,
+            totalRest,
+            startDate: blockStart,
+            endDate: finalEndDate
+          });
+        }
       }
 
       if (blockLength >= 3) {
         const dayBefore = new Date(blockStart);
         dayBefore.setDate(blockStart.getDate() - 1);
-        if (!isOffDay(dayBefore)) {
-          rawCandidates.push({
-            leaveDate: dayBefore,
-            title: `${holidayName} 앞당김 연차`,
-            leave: `${formatDateMD(dayBefore)} 연차 1일`,
-            benefit: `총 ${blockLength + 1}일 연속 휴식 (${formatDateMD(dayBefore)} ~ ${formatDateMD(blockEnd)})`,
-            badge: `연차 1일 = ${blockLength + 1}일 휴식`,
-            totalRest: blockLength + 1,
-            startDate: dayBefore,
-            endDate: blockEnd
-          });
+        if (!isPublicOffDay(dayBefore)) {
+          const dayBeforeKey = formatDateKey(dayBefore);
+          if (!userLeavesMap.has(dayBeforeKey)) {
+            rawCandidates.push({
+              leaveDate: dayBefore,
+              title: `${holidayName} 앞당김 연차`,
+              leave: `${formatDateMD(dayBefore)} 연차 1일`,
+              benefit: `총 ${blockLength + 1}일 연속 휴식 (${formatDateMD(dayBefore)} ~ ${formatDateMD(blockEnd)})`,
+              badge: `연차 1일 = ${blockLength + 1}일 휴식`,
+              totalRest: blockLength + 1,
+              startDate: dayBefore,
+              endDate: blockEnd
+            });
+          }
         }
 
         const dayAfter = new Date(blockEnd);
         dayAfter.setDate(blockEnd.getDate() + 1);
-        if (!isOffDay(dayAfter)) {
-          rawCandidates.push({
-            leaveDate: dayAfter,
-            title: `${holidayName} 연장 연차`,
-            leave: `${formatDateMD(dayAfter)} 연차 1일`,
-            benefit: `총 ${blockLength + 1}일 연속 휴식 (${formatDateMD(blockStart)} ~ ${formatDateMD(dayAfter)})`,
-            badge: `연차 1일 = ${blockLength + 1}일 휴식`,
-            totalRest: blockLength + 1,
-            startDate: blockStart,
-            endDate: dayAfter
-          });
+        if (!isPublicOffDay(dayAfter)) {
+          const dayAfterKey = formatDateKey(dayAfter);
+          if (!userLeavesMap.has(dayAfterKey)) {
+            rawCandidates.push({
+              leaveDate: dayAfter,
+              title: `${holidayName} 연장 연차`,
+              leave: `${formatDateMD(dayAfter)} 연차 1일`,
+              benefit: `총 ${blockLength + 1}일 연속 휴식 (${formatDateMD(blockStart)} ~ ${formatDateMD(dayAfter)})`,
+              badge: `연차 1일 = ${blockLength + 1}일 휴식`,
+              totalRest: blockLength + 1,
+              startDate: blockStart,
+              endDate: dayAfter
+            });
+          }
         }
       }
     }
@@ -2266,7 +2406,7 @@ function renderTravelWidget(baseDate, containerId = "main-travel-recommendations
 }
 
 // ==========================================
-// 15. 캘린더 그리드 DOM 생성 (내 연차 반영 & 연차등록 모드 지원)
+// 15. 캘린더 그리드 DOM 생성
 // ==========================================
 function createCalendarGridFragment(year, month, isLeaveRegisterMode = false) {
   const firstDayIndex = new Date(year, month, 1).getDay();
@@ -2698,7 +2838,7 @@ const lunchDatabase = [
   { name: "얼큰 소고기 육개장", cat: "korean", icon: "🍲", desc: "고사리와 소고기가 듬뿍 들어간 칼칼하고 진한 보양 국물!" },
   { name: "보글보글 햄가득 부대찌개", cat: "korean", icon: "🥘", desc: "라면 사리 퐁당! 동료들과 함께 끓여먹는 직장인 최애 픽." },
   { name: "바글바글 해물 순두부찌개", cat: "korean", icon: "🍲", desc: "부드러운 순두부와 매콤 칼칼한 해물 육수의 조화." },
-  { name: "지글지글 돌솥 비빔밥", cat: "korean", icon: "🍚", desc: "눌어붙은 누룽지까지 고소하게 긁어먹는 든든한 한 그릇." },
+  { name: "지글지글 돌솥 비빔밥", cat: "🍚", desc: "눌어붙은 누룽지까지 고소하게 긁어먹는 든든한 한 그릇." },
   { name: "진한 한우 갈비탕", cat: "korean", icon: "🍖", desc: "당면과 큼직한 갈빗대가 푸짐하게 들어간 기력 충전 한 그릇." },
   { name: "우렁 강된장 쌈밥정식", cat: "korean", icon: "🥬", desc: "쫄깃한 우렁이와 짭조름한 강된장의 건강하고 맛있는 조합." },
   { name: "매콤 춘천식 철판 닭갈비", cat: "korean", icon: "🍗", desc: "떡과 고구마, 양배추와 함께 볶아먹고 마지막엔 볶음밥 필수!" },
@@ -3014,18 +3154,16 @@ async function init() {
   initNavigationAndDrawers();
   initCalendarDetailModal();
   initFeedbackSystem();
-  setupWorkTimeInputs();
+  initProfileEditModal();
   setupSimCalendarControls();
   setupLunchEngine();
   setupSlackingEngine();
   initWidgetOrderManager();
   initLeaveRegisterForm();
-  initPasswordChangeForm(); // 🌟 비밀번호 변경 모달 이벤트 리스너
+  initPasswordChangeForm();
 
-  // 🌟 세션 24시간 만료 여부 1차 체크
   checkSessionExpiration();
 
-  // 로그인 상태라면 사용자 연차 데이터 사전 로드
   const currentUser = getCurrentUser();
   if (currentUser) {
     await loadUserLeaves(currentUser.id);
@@ -3033,15 +3171,14 @@ async function init() {
 
   await renderMainRealtimeSpace();
   updateCountdown();
+  updateWorkTimeDisplay();
   setInterval(updateCountdown, 1000);
 
-  // 🌟 1분마다 세션 만료 검사
   setInterval(checkSessionExpiration, 60000);
 
   hideLoadingScreen();
   setTimeout(checkAndApplyTitleMarquee, 200);
 
-  // 인증 시스템 초기화
   initAuthSystem();
 }
 
