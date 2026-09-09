@@ -27,6 +27,9 @@
     <p class="loading-text">데이터 불러오는 중...</p>
   </div>
 
+  <!-- 글로벌 토스트 알림 컨테이너 -->
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
   <!-- 상단 앱 바 -->
   <header class="app-top-bar" id="app-top-bar">
     <div class="top-bar-inner">
@@ -60,7 +63,7 @@
 
       <!-- 상단 우측 액션 영역 -->
       <div class="top-bar-right-actions">
-        <!-- 🌟 스크롤 시 게스트 버튼 왼쪽에 나타나는 피드백 버튼 -->
+        <!-- 스크롤 시 게스트 버튼 왼쪽에 나타나는 피드백 버튼 -->
         <button type="button" class="top-bar-feedback-btn is-hidden" id="btn-top-feedback" title="피드백 작성">
           <span class="material-symbols-outlined">chat</span>
           <span class="btn-text">피드백</span>
@@ -72,7 +75,7 @@
           <span class="user-name-text" id="top-user-name">로그인</span>
         </button>
 
-        <!-- 🌟 우측 상단 확대 애니메이션 프로필 팝업 메뉴 -->
+        <!-- 우측 상단 확대 애니메이션 프로필 팝업 메뉴 -->
         <div class="profile-popup" id="profile-popup" role="dialog" aria-hidden="true">
           <div class="profile-popup-header">
             <span class="material-symbols-outlined profile-popup-avatar">account_circle</span>
@@ -82,6 +85,10 @@
             </div>
           </div>
           <div class="profile-popup-menu">
+            <button type="button" class="profile-popup-item" id="btn-popup-edit-profile">
+              <span class="material-symbols-outlined">manage_accounts</span>
+              <span>개인정보 변경</span>
+            </button>
             <button type="button" class="profile-popup-item" id="btn-popup-change-pw">
               <span class="material-symbols-outlined">lock_reset</span>
               <span>비밀번호 변경</span>
@@ -115,12 +122,17 @@
           </button>
         </div>
 
-        <!-- 위젯 1: 실시간 쉬는 날 카운트다운 -->
+        <!-- 위젯 1: 실시간 쉬는 날 카운트다운 (🌟 헤더 우측 연필 버튼 포함) -->
         <section class="md-card hero-card dashboard-widget" data-widget-id="countdown" id="widget-countdown">
           <div class="card-header">
             <div>
               <span class="card-overline">REALTIME COUNTDOWN</span>
               <h2 id="timer-title" class="title-large">다음 쉬는 날까지</h2>
+            </div>
+            <div class="card-header-actions">
+              <button type="button" class="btn-cal-action-add" id="btn-edit-work-time" title="근무 시간 설정" aria-label="근무 시간 설정">
+                <span class="material-symbols-outlined">edit</span>
+              </button>
             </div>
           </div>
           
@@ -171,24 +183,15 @@
               <div class="linear-progress-indicator" id="progress-bar"></div>
             </div>
 
-            <!-- 게이지 밑 오른쪽 출근/퇴근 시간 설정 칩 행 -->
-            <div class="progress-bottom-row">
-              <label for="start-work-time" class="target-time-chip compact-chip" title="출근 시간 변경 (브라우저에 자동 저장)">
-                <span class="material-symbols-outlined chip-icon">schedule</span>
-                <span class="chip-label">출근시간</span>
-                <input type="time" id="start-work-time" class="time-input-inline" />
-              </label>
-
-              <label for="off-work-time" class="target-time-chip compact-chip" title="퇴근 시간 변경 (브라우저에 자동 저장)">
-                <span class="material-symbols-outlined chip-icon">schedule</span>
-                <span class="chip-label">퇴근시간</span>
-                <input type="time" id="off-work-time" class="time-input-inline" />
-              </label>
+            <!-- 설정된 출퇴근 시간 단정 표시 배지 -->
+            <div class="countdown-work-time-display" id="countdown-work-time-badge" title="프로필 > 개인정보 변경에서 수정 가능">
+              <span class="material-symbols-outlined" style="font-size: 14px;">schedule</span>
+              <span id="countdown-work-time-text">출근 08:00 · 퇴근 17:00</span>
             </div>
           </div>
         </section>
 
-        <!-- 위젯 2: 현재 월 고정 달력 (날씨 표시 지원) -->
+        <!-- 위젯 2: 현재 월 고정 달력 (날씨 표시 지원 & 연차 추가 버튼) -->
         <section class="md-card dashboard-widget" data-widget-id="calendar" id="widget-calendar">
           <div class="cal-nav-bar">
             <div class="cal-title-area">
@@ -196,6 +199,12 @@
               <div class="cal-title-row">
                 <h2 id="main-cal-month-year" class="title-medium">이번 달 달력</h2>
               </div>
+            </div>
+            <!-- 메인 화면 전용 연차 추가 (+) 버튼 -->
+            <div class="cal-nav-actions">
+              <button type="button" class="btn-cal-action-add" id="btn-main-add-leave" title="연차 추가하기" aria-label="연차 추가하기">
+                <span class="material-symbols-outlined">add</span>
+              </button>
             </div>
           </div>
 
@@ -446,6 +455,7 @@
 
     <div class="fullscreen-drawer-scroll">
       <div class="fullscreen-content-container">
+        <!-- 달력 선택 섹션 -->
         <section class="md-card">
           <div class="cal-nav-bar">
             <div class="cal-title-area">
@@ -462,6 +472,12 @@
                 <span class="material-symbols-outlined icon-small">chevron_right</span>
               </button>
             </div>
+          </div>
+
+          <!-- 달력 상단 인라인 안내 팁 배너 -->
+          <div class="calendar-inline-tip">
+            <span class="material-symbols-outlined tip-icon">lightbulb</span>
+            <span class="tip-text"><strong>휴가를 등록하거나 수정</strong>하고 싶은 날짜를 달력에서 터치하세요.</span>
           </div>
 
           <div class="calendar-grid-header">
@@ -646,7 +662,7 @@
               <div class="stat-content">
                 <span class="stat-label">주말 (토/일)</span>
                 <span class="stat-value" id="sim-stat-weekend-days">0일</span>
-                <span class="stat-sub" id="sim-stat-weekend-detail">토 0일 / 일 0일</span>
+                <span class="stat-sub" id="main-stat-weekend-detail">토 0일 / 일 0일</span>
               </div>
               <span class="material-symbols-outlined stat-icon">weekend</span>
             </div>
@@ -1149,7 +1165,45 @@
   </div>
 
   <!-- ==========================================
-       🌟 12. 비밀번호 변경 전용 모달
+       12. 개인정보 변경 전용 모달 (출퇴근 시간 설정)
+       ========================================== -->
+  <div class="modal-backdrop" id="profile-edit-modal-backdrop"></div>
+  <div class="cal-detail-modal auth-modal-card" id="profile-edit-modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <span class="material-symbols-outlined modal-icon" style="color: var(--md-sys-color-primary);">manage_accounts</span>
+        <div>
+          <h3 class="modal-date">개인정보 변경</h3>
+          <span class="modal-status-badge normal">근무 시간 설정</span>
+        </div>
+      </div>
+      <button type="button" class="md-icon-button modal-close-btn" id="btn-close-profile-edit" aria-label="닫기">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <form id="profile-edit-form" class="feedback-form-content">
+        <div class="form-group-item">
+          <label for="edit-start-work-time" class="fb-label">출근 시간</label>
+          <input type="time" id="edit-start-work-time" class="fb-select" required />
+        </div>
+
+        <div class="form-group-item">
+          <label for="edit-off-work-time" class="fb-label">퇴근 시간</label>
+          <input type="time" id="edit-off-work-time" class="fb-select" required />
+        </div>
+
+        <button type="submit" id="btn-profile-edit-submit" class="fb-submit-btn" style="margin-top: 6px;">
+          <span class="material-symbols-outlined" style="font-size: 18px;">check_circle</span>
+          <span id="profile-edit-btn-text">근무 시간 저장</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       13. 비밀번호 변경 전용 모달
        ========================================== -->
   <div class="modal-backdrop" id="pw-change-modal-backdrop"></div>
   <div class="cal-detail-modal auth-modal-card" id="pw-change-modal" role="dialog" aria-modal="true">
