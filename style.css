@@ -99,10 +99,6 @@
     --md-elevation-3: 0 10px 18px 0 rgba(0, 0, 0, 0.65);
   }
 
-  [data-theme="auto"] .time-input-inline::-webkit-calendar-picker-indicator {
-    filter: invert(0.8);
-  }
-
   [data-theme="auto"] .cal-cell.holiday {
     background-color: #450a0a;
     border-color: #991b1b;
@@ -141,7 +137,7 @@
 }
 
 /* ==========================================
-   2. 전역 스타일 & 로딩 화면
+   2. 전역 스타일, 로딩 화면 & 토스트 컨테이너
    ========================================== */
 * {
   box-sizing: border-box;
@@ -209,6 +205,68 @@ body.is-loading {
   font-size: 0.9375rem;
   font-weight: 700;
   color: var(--md-sys-color-outline);
+}
+
+/* 토스트 알림 UI */
+.toast-container {
+  position: fixed;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  pointer-events: none;
+  width: max-content;
+  max-width: 90vw;
+}
+
+.toast-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-radius: var(--md-shape-corner-full);
+  background: rgba(15, 23, 42, 0.94);
+  color: #ffffff;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255, 255, 255, 0.16);
+  box-shadow: var(--md-elevation-3);
+  font-size: 0.875rem;
+  font-weight: 800;
+  pointer-events: auto;
+  user-select: none;
+  animation: toastSlideUpAnim 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.toast-item .toast-icon {
+  font-size: 20px;
+  color: #60a5fa;
+  flex-shrink: 0;
+}
+
+.toast-item.is-hiding {
+  opacity: 0;
+  transform: translateY(12px) scale(0.95);
+}
+
+[data-theme="dark"] .toast-item {
+  background: rgba(30, 41, 59, 0.94);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .toast-item .toast-icon {
+  color: #93c5fd;
+}
+
+@keyframes toastSlideUpAnim {
+  0% { transform: translateY(20px) scale(0.92); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
 }
 
 .app-top-bar {
@@ -428,9 +486,7 @@ body.is-loading {
   font-size: 16px;
 }
 
-/* ==========================================
-   🌟 우측 상단 확대 애니메이션 프로필 팝업
-   ========================================== */
+/* 우측 상단 확대 애니메이션 프로필 팝업 */
 .profile-popup-backdrop {
   position: fixed;
   inset: 0;
@@ -710,77 +766,6 @@ body.is-loading {
   font-size: 20px;
 }
 
-.progress-bottom-row {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  width: 100%;
-  margin-top: 8px;
-  box-sizing: border-box;
-}
-
-.target-time-chip.compact-chip {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: 100%;
-  min-width: 0;
-  padding: 6px 10px;
-  border-radius: var(--md-shape-corner-small);
-  background-color: var(--md-sys-color-surface-container-high);
-  color: var(--md-sys-color-on-surface);
-  border: 1px solid var(--card-border-color);
-  cursor: pointer;
-  user-select: none;
-  box-sizing: border-box;
-  overflow: hidden;
-  transition: background-color 0.2s, border-color 0.2s;
-}
-
-.target-time-chip.compact-chip:hover {
-  border-color: var(--md-sys-color-primary);
-  background-color: var(--md-sys-color-primary-container);
-}
-
-.chip-icon {
-  display: none !important;
-}
-
-.chip-label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--md-sys-color-outline);
-  cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.time-input-inline {
-  background: transparent;
-  border: none;
-  color: var(--md-sys-color-primary);
-  font-size: 0.75rem;
-  font-weight: 800;
-  outline: none;
-  cursor: pointer;
-  padding: 0;
-  width: auto;
-  min-width: 0;
-  max-width: 100%;
-  font-family: inherit;
-  text-align: center;
-}
-
-.time-input-inline::-webkit-calendar-picker-indicator {
-  cursor: pointer;
-  opacity: 0.7;
-}
-
-[data-theme="dark"] .time-input-inline::-webkit-calendar-picker-indicator {
-  filter: invert(0.8);
-}
-
 .md-button {
   display: inline-flex;
   align-items: center;
@@ -920,6 +905,7 @@ body.is-loading {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-top: 4px;
 }
 
 .progress-labels {
@@ -945,8 +931,31 @@ body.is-loading {
   transition: width 0.4s ease;
 }
 
+/* 🌟 카운트다운 하단 출퇴근 시간 단정 표시 배지 */
+.countdown-work-time-display {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 5px 14px;
+  border-radius: var(--md-shape-corner-full);
+  background-color: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-outline);
+  border: 1px solid var(--card-border-color);
+  font-size: 0.75rem;
+  font-weight: 800;
+  width: fit-content;
+  align-self: center;
+  user-select: none;
+}
+
+.countdown-work-time-display .material-symbols-outlined {
+  color: var(--md-sys-color-primary);
+}
+
 /* ==========================================
-   6. 캘린더 그리드 & 배지
+   6. 캘린더 그리드, 팁 배너
    ========================================== */
 .cal-nav-bar {
   display: flex;
@@ -970,6 +979,73 @@ body.is-loading {
   display: flex;
   gap: 6px;
   margin-top: 4px;
+}
+
+/* 메인 화면 캘린더(+) 액션 버튼 */
+.cal-nav-actions {
+  display: flex;
+  align-items: center;
+}
+
+.btn-cal-action-add {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--md-shape-corner-full);
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  border: 1.5px solid var(--card-border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--md-elevation-1);
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.btn-cal-action-add:hover {
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  border-color: var(--md-sys-color-primary);
+  transform: translateY(-1px) scale(1.06);
+  box-shadow: var(--md-elevation-2);
+}
+
+.btn-cal-action-add .material-symbols-outlined {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+/* 달력 상단 인라인 안내 팁 배너 */
+.calendar-inline-tip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  border: 1.5px solid rgba(0, 95, 176, 0.22);
+  border-radius: var(--md-shape-corner-medium);
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.4;
+  box-shadow: 0 1px 3px rgba(0, 95, 176, 0.08);
+}
+
+.calendar-inline-tip .tip-icon {
+  font-size: 20px;
+  color: var(--md-sys-color-primary);
+  flex-shrink: 0;
+}
+
+.calendar-inline-tip .tip-text {
+  flex: 1;
+}
+
+[data-theme="dark"] .calendar-inline-tip {
+  background: rgba(0, 73, 125, 0.35);
+  border-color: rgba(158, 202, 254, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .calendar-grid-header {
@@ -2757,26 +2833,6 @@ body.is-loading {
   .countdown-display { gap: 8px; }
   .countdown-separator { font-size: 1.4rem; margin-bottom: 20px; }
 
-  .progress-bottom-row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
-    margin-top: 6px;
-    width: 100%;
-  }
-  .target-time-chip.compact-chip {
-    padding: 5px 4px;
-    gap: 4px;
-    min-width: 0;
-  }
-  .target-time-chip .chip-label {
-    font-size: 0.6875rem;
-    flex-shrink: 0;
-  }
-  .target-time-chip .time-input-inline {
-    font-size: 0.6875rem;
-    min-width: 0;
-  }
-
   .stats-grid, .situation-grid { grid-template-columns: 1fr; }
   .calendar-viewport { min-height: 285px; }
   .cal-cell { min-height: 52px; padding: 4px 3px 3px; }
@@ -2784,6 +2840,32 @@ body.is-loading {
   .cal-weather-icon { font-size: 0.75rem; }
   .cal-temp { font-size: 0.5625rem; }
   .cal-sub-label { font-size: 0.5625rem; }
+  
+  .btn-cal-action-add {
+    width: 32px;
+    height: 32px;
+  }
+  .btn-cal-action-add .material-symbols-outlined {
+    font-size: 18px;
+  }
+
+  .calendar-inline-tip {
+    padding: 8px 10px;
+    font-size: 0.75rem;
+    margin-bottom: 10px;
+  }
+  .calendar-inline-tip .tip-icon {
+    font-size: 18px;
+  }
+
+  .toast-container {
+    bottom: calc(20px + env(safe-area-inset-bottom, 8px));
+  }
+  .toast-item {
+    padding: 10px 16px;
+    font-size: 0.8125rem;
+  }
+
   .recommendation-item { flex-direction: column; align-items: flex-start; gap: 8px; }
   .theme-switcher-fab.left-fab { bottom: 16px; left: 16px; }
   .feedback-fab.right-fab { bottom: 16px; right: 16px; padding: 10px 14px; font-size: 0.8125rem; }
