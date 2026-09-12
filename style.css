@@ -424,6 +424,37 @@ body.is-loading {
   position: relative;
 }
 
+/* 🌟 위젯 순서 편집 모드 전용 '완료' 버튼 */
+.top-bar-done-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: var(--md-shape-corner-full);
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  border: 1.5px solid var(--md-sys-color-primary);
+  font-size: 0.8125rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: var(--md-elevation-2);
+  animation: feedbackDropBounce 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  transition: transform 0.15s ease, background-color 0.2s;
+}
+
+.top-bar-done-btn:hover {
+  transform: scale(1.04);
+}
+
+.top-bar-done-btn.is-hidden {
+  display: none !important;
+}
+
+.top-bar-done-btn .material-symbols-outlined {
+  font-size: 18px;
+}
+
 /* 👤 로그인/게스트 버튼 */
 .top-bar-user-btn {
   display: inline-flex;
@@ -455,24 +486,22 @@ body.is-loading {
   white-space: nowrap;
 }
 
-/* 🌟 상단 피드백 버튼: 게스트 버튼과 완벽히 동일한 규격 (패딩, 테두리, 아이콘 18px)
-      등장 시 아래로 뿅(바운스 낙하), 사라질 때 위로 쏙! */
+/* 🌟 상단 피드백 버튼 */
 .top-bar-feedback-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px; /* 게스트 버튼과 100% 동일 */
+  padding: 6px 12px;
   border-radius: var(--md-shape-corner-full);
   background-color: var(--md-sys-color-primary-container);
   color: var(--md-sys-color-on-primary-container);
-  border: 1.5px solid var(--card-border-color); /* 게스트 버튼과 100% 동일 */
+  border: 1.5px solid var(--card-border-color);
   font-size: 0.8125rem;
   font-weight: 800;
   cursor: pointer;
   flex-shrink: 0;
   white-space: nowrap;
 
-  /* 정상 표시 상태 */
   max-width: 130px;
   opacity: 1;
   transform: translateY(0) scale(1);
@@ -480,7 +509,6 @@ body.is-loading {
   pointer-events: auto;
   visibility: visible;
 
-  /* 🌟 등장 애니메이션: 위에서 아래로 뿅! 통통 튀며 안착 */
   transition: 
     transform 0.36s cubic-bezier(0.34, 1.56, 0.64, 1),
     opacity 0.22s ease,
@@ -498,7 +526,6 @@ body.is-loading {
   transform: translateY(-1px) scale(1.03);
 }
 
-/* 🌟 숨김 상태: 찌그러짐 없이 위쪽 천장으로 쏙! 빨려 올라가며 사라짐 */
 .top-bar-feedback-btn.is-hidden {
   opacity: 0 !important;
   transform: translateY(-34px) scale(0.82) !important;
@@ -506,11 +533,10 @@ body.is-loading {
   padding-left: 0 !important;
   padding-right: 0 !important;
   border-color: transparent !important;
-  margin-left: -8px !important; /* flex gap 상쇄 */
+  margin-left: -8px !important;
   pointer-events: none !important;
   visibility: hidden;
 
-  /* 🌟 퇴장 애니메이션: 위로 먼저 빠르게 쏙 올라간 뒤 공간 정리 */
   transition: 
     transform 0.24s cubic-bezier(0.4, 0, 0.2, 1),
     opacity 0.18s ease-in,
@@ -522,7 +548,7 @@ body.is-loading {
 }
 
 .top-bar-feedback-btn .material-symbols-outlined {
-  font-size: 18px; /* 게스트 버튼의 아이콘(18px)과 동일하게 조정 */
+  font-size: 18px;
   flex-shrink: 0;
 }
 
@@ -775,42 +801,6 @@ body.is-loading {
   text-transform: uppercase;
 }
 
-.widget-order-top-bar {
-  display: flex;
-  width: 100%;
-  margin-bottom: -6px;
-}
-
-.btn-widget-reorder-main {
-  width: 100%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border-radius: var(--md-shape-corner-medium);
-  background-color: var(--md-sys-color-primary-container);
-  color: var(--md-sys-color-on-primary-container);
-  border: 1px solid var(--card-border-color);
-  font-size: 0.875rem;
-  font-weight: 800;
-  cursor: pointer;
-  box-shadow: var(--md-elevation-1);
-  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
-}
-
-.btn-widget-reorder-main:hover {
-  background-color: var(--md-sys-color-primary);
-  color: var(--md-sys-color-on-primary);
-  border-color: var(--md-sys-color-primary);
-  transform: translateY(-1px);
-  box-shadow: var(--md-elevation-2);
-}
-
-.btn-widget-reorder-main .material-symbols-outlined {
-  font-size: 20px;
-}
-
 .md-button {
   display: inline-flex;
   align-items: center;
@@ -863,7 +853,7 @@ body.is-loading {
 }
 
 /* ==========================================
-   5. 클린 텍스트 플립다운 시계 (Safari 호환 완화)
+   5. 클린 텍스트 플립다운 시계
    ========================================== */
 .countdown-display {
   display: flex;
@@ -1793,15 +1783,6 @@ body.is-loading {
   transform: translateX(2px);
 }
 
-.nav-menu-item.primary-action {
-  background-color: var(--md-sys-color-primary-container);
-  border-color: rgba(0, 95, 176, 0.3);
-}
-.nav-menu-item.primary-action .nav-item-icon,
-.nav-menu-item.primary-action .nav-item-arrow {
-  color: var(--md-sys-color-primary);
-}
-
 .nav-item-icon { font-size: 24px; color: var(--md-sys-color-outline); }
 .nav-item-text { flex: 1; display: flex; flex-direction: column; }
 .nav-item-title { font-size: 0.9375rem; font-weight: 800; color: var(--md-sys-color-on-surface); }
@@ -2459,96 +2440,59 @@ body.is-loading {
 }
 
 /* ==========================================
-   12. 메인 위젯 순서 설정 모달
+   12. 🌟 아이폰 홈 화면 스타일 위젯 지글 & 드래그 엔진
    ========================================== */
-.widget-order-modal {
-  max-width: 440px;
+
+/* 위젯 길게 누를 때 글자/이미지 복사 돋보기 팝업 원천 차단 */
+.dashboard-widget,
+.dashboard-widget * {
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
 }
 
-.widget-order-guide {
-  font-size: 0.8125rem;
-  color: var(--md-sys-color-outline);
-  margin-bottom: 12px;
+/* 지글(편집) 모드 활성화 시 각 위젯이 아이폰처럼 덜덜 떨림 */
+body.is-editing-widgets .dashboard-widget {
+  animation: widgetJiggle 0.28s infinite alternate ease-in-out;
+  cursor: grab;
+  position: relative;
+  touch-action: none; /* 드래그 중 브라우저 스크롤 방지 */
 }
 
-.widget-order-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 380px;
-  overflow-y: auto;
-  padding: 2px;
+/* 홀수/짝수 위젯의 각도와 속도를 엇갈리게 하여 리얼한 진동감 연출 */
+body.is-editing-widgets .dashboard-widget:nth-child(even) {
+  animation-name: widgetJiggleAlt;
+  animation-duration: 0.32s;
 }
 
-.widget-order-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 12px;
-  background-color: var(--md-sys-color-surface-container-high);
-  border: 1.5px solid var(--card-border-color);
-  border-radius: var(--md-shape-corner-medium);
-  transition: transform 0.2s ease, border-color 0.2s ease;
+@keyframes widgetJiggle {
+  0% { transform: rotate(-1.2deg) translate3d(-0.5px, 0.5px, 0); }
+  50% { transform: rotate(1.1deg) translate3d(0.5px, -0.5px, 0); }
+  100% { transform: rotate(-0.9deg) translate3d(-0.5px, -0.5px, 0); }
 }
 
-.widget-order-item-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+@keyframes widgetJiggleAlt {
+  0% { transform: rotate(1.1deg) translate3d(0.5px, -0.5px, 0); }
+  50% { transform: rotate(-1.2deg) translate3d(-0.5px, 0.5px, 0); }
+  100% { transform: rotate(0.9deg) translate3d(0.5px, 0.5px, 0); }
 }
 
-.widget-order-index {
-  font-size: 0.75rem;
-  font-weight: 900;
-  color: var(--md-sys-color-outline);
-  width: 20px;
-  text-align: center;
+/* 드래그 중인 위젯: 살짝 커지며 떠오르고 그림자가 짙어짐 */
+body.is-editing-widgets .dashboard-widget.is-dragging {
+  animation: none !important;
+  transform: scale(1.035) translate3d(0, 0, 0) !important;
+  opacity: 0.94;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3) !important;
+  z-index: 1000 !important;
+  cursor: grabbing;
 }
 
-.widget-order-name {
-  font-size: 0.875rem;
-  font-weight: 800;
-  color: var(--md-sys-color-on-surface);
-}
-
-.widget-order-btns {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.btn-order-move {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  border: 1px solid var(--card-border-color);
-  background-color: var(--md-sys-color-surface);
-  color: var(--md-sys-color-on-surface);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.btn-order-move:hover:not(:disabled) {
-  background-color: var(--md-sys-color-primary-container);
-  color: var(--md-sys-color-on-primary-container);
-  border-color: var(--md-sys-color-primary);
-}
-
-.btn-order-move:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
-.widget-order-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1.5px solid var(--card-border-color);
+/* 드래그 위젯이 다른 위젯 영역 위로 올라갔을 때 위치 안내 가이드 */
+.dashboard-widget.drag-over {
+  outline: 2px dashed var(--md-sys-color-primary) !important;
+  outline-offset: 4px;
 }
 
 /* ==========================================
@@ -2918,7 +2862,11 @@ input[type="time"].fb-select::-webkit-date-and-time-value {
     max-width: 55px;
   }
   
-  /* 모바일에서도 게스트 버튼과 100% 동일 규격 */
+  .top-bar-done-btn {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+  }
+
   .top-bar-feedback-btn { 
     padding: 5px 8px; 
     font-size: 0.75rem; 
