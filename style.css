@@ -424,7 +424,7 @@ body.is-loading {
   position: relative;
 }
 
-/* 🌟 위젯 순서 편집 모드 전용 '완료' 버튼 */
+/* 위젯 순서 편집 완료 버튼 */
 .top-bar-done-btn {
   display: inline-flex;
   align-items: center;
@@ -486,7 +486,7 @@ body.is-loading {
   white-space: nowrap;
 }
 
-/* 🌟 상단 피드백 버튼 (게스트 버튼과 동일 크기, 부드러운 양방향 애니메이션) */
+/* 상단 피드백 버튼 */
 .top-bar-feedback-btn {
   display: inline-flex;
   align-items: center;
@@ -2440,7 +2440,7 @@ body.is-loading {
 }
 
 /* ==========================================
-   12. 🌟 위젯 지글(Jiggle) & 실시간 드래그/가이드라인 엔진
+   12. 🌟 위젯 순서 변경 (터치 선택 & 이동 슬롯 시스템)
    ========================================== */
 
 /* 텍스트/이미지 복사 돋보기 팝업 원천 차단 */
@@ -2494,67 +2494,86 @@ body.is-editing-widgets .widget-reset-bar {
   font-size: 18px;
 }
 
-/* 편집 모드 활성화 시 아이폰 스타일 덜덜 떨림 */
+/* 편집 모드 상태의 위젯들 (터치 선택 가능) */
 body.is-editing-widgets .dashboard-widget {
-  animation: widgetJiggle 0.28s infinite alternate ease-in-out;
-  cursor: grab;
+  cursor: pointer;
   position: relative;
-  touch-action: none; /* 모바일 드래그 중 스크롤 방지 */
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-body.is-editing-widgets .dashboard-widget:nth-child(even) {
-  animation-name: widgetJiggleAlt;
-  animation-duration: 0.32s;
+body.is-editing-widgets .dashboard-widget:hover {
+  border-color: var(--md-sys-color-primary);
 }
 
-@keyframes widgetJiggle {
-  0% { transform: rotate(-1.2deg) translate3d(-0.5px, 0.5px, 0); }
-  50% { transform: rotate(1.1deg) translate3d(0.5px, -0.5px, 0); }
-  100% { transform: rotate(-0.9deg) translate3d(-0.5px, -0.5px, 0); }
+/* 🌟 선택된 위젯 강조 (이동 대상) */
+body.is-editing-widgets .dashboard-widget.is-selected {
+  border-color: var(--md-sys-color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(0, 95, 176, 0.3), var(--md-elevation-3) !important;
+  transform: scale(1.02);
+  background-color: var(--md-sys-color-surface-container-high);
 }
 
-@keyframes widgetJiggleAlt {
-  0% { transform: rotate(1.1deg) translate3d(0.5px, -0.5px, 0); }
-  50% { transform: rotate(-1.2deg) translate3d(-0.5px, 0.5px, 0); }
-  100% { transform: rotate(0.9deg) translate3d(0.5px, 0.5px, 0); }
+/* 선택 상태 배지 표시 */
+body.is-editing-widgets .dashboard-widget.is-selected::before {
+  content: "선택됨 (이동할 위치를 누르세요)";
+  position: absolute;
+  top: -12px;
+  left: 16px;
+  background: var(--md-sys-color-primary);
+  color: #ffffff;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: var(--md-shape-corner-full);
+  box-shadow: var(--md-elevation-2);
+  z-index: 10;
+  pointer-events: none;
+  animation: feedbackDropBounce 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-/* 🌟 드래그 중인 위젯 (손가락/마우스를 따라다니는 플로팅 상태) */
-body.is-editing-widgets .dashboard-widget.is-dragging {
-  animation: none !important;
-  opacity: 0.92 !important;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35) !important;
-  z-index: 9999 !important;
-  pointer-events: none !important; /* 아래의 위젯 감지를 위해 이벤트 통과 */
-  transform: scale(1.04) !important;
-}
-
-/* 🌟 이동할 자리를 명확하게 보여주는 시각 가이드라인 박스 */
-.widget-drop-placeholder {
-  width: 100%;
-  box-sizing: border-box;
-  border: 2px dashed var(--md-sys-color-primary) !important;
-  background-color: var(--md-sys-color-primary-container) !important;
-  border-radius: var(--md-shape-corner-large);
-  opacity: 0.65;
-  transition: height 0.2s cubic-bezier(0.2, 0, 0, 1), margin 0.2s ease;
-  animation: placeholderPulse 1.2s infinite ease-in-out;
+/* 🌟 사이사이 배치되는 '여기로 이동' 슬롯 버튼 */
+.widget-insert-slot {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.widget-drop-placeholder::after {
-  content: "여기로 이동";
-  font-size: 0.8125rem;
-  font-weight: 800;
+  gap: 6px;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 16px;
+  border-radius: var(--md-shape-corner-medium);
+  border: 2px dashed var(--md-sys-color-primary);
+  background-color: rgba(0, 95, 176, 0.08);
   color: var(--md-sys-color-primary);
-  opacity: 0.9;
+  font-size: 0.875rem;
+  font-weight: 800;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
+  animation: slotSlideDown 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes placeholderPulse {
-  0%, 100% { opacity: 0.55; }
-  50% { opacity: 0.85; }
+.widget-insert-slot:hover,
+.widget-insert-slot:active {
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  transform: scale(1.02);
+}
+
+.widget-insert-slot .material-symbols-outlined {
+  font-size: 20px;
+}
+
+@keyframes slotSlideDown {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.7);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
 }
 
 /* ==========================================
@@ -2726,7 +2745,7 @@ body.is-editing-widgets .dashboard-widget.is-dragging {
 
 .time-picker-input {
   width: 100% !important;
-  padding-right: 40px !important; /* 우측 시계 기호 공간 확보 */
+  padding-right: 40px !important;
   cursor: pointer;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -2741,7 +2760,6 @@ body.is-editing-widgets .dashboard-widget.is-dragging {
   align-items: center;
 }
 
-/* Safari 및 모바일 WebKit 네이티브 피커 인디케이터 투명 확장 */
 .time-picker-input::-webkit-calendar-picker-indicator {
   position: absolute;
   top: 0;
@@ -2754,7 +2772,6 @@ body.is-editing-widgets .dashboard-widget.is-dragging {
   cursor: pointer;
 }
 
-/* 항상 우측에 확실하게 보이는 커스텀 시계 아이콘 */
 .time-picker-icon {
   position: absolute;
   right: 12px;
