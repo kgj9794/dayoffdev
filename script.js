@@ -379,6 +379,10 @@ function initGlobalHistoryAndEscListener() {
 
   window.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
+      if (isEditingWidgets) {
+        exitWidgetEditMode();
+        return;
+      }
       closeProfilePopup();
       if (modalHistoryStack.length > 0) {
         const topModal = modalHistoryStack[modalHistoryStack.length - 1];
@@ -395,8 +399,12 @@ function initGlobalHistoryAndEscListener() {
 }
 
 // ==========================================
-// 4. 위젯 순서 관리 & 대시보드 렌더링
+// 4. 🌟 아이폰 스타일 롱프레스 지글 & 드래그 앤 드롭 엔진
 // ==========================================
+let isEditingWidgets = false;
+let activeDragWidget = null;
+let isPointerDragging = false;
+
 function getSavedWidgetOrder() {
   try {
     const saved = localStorage.getItem("app_widget_order");
@@ -420,13 +428,8 @@ function saveWidgetOrder(order) {
 function applyWidgetOrderToDOM(order) {
   const colPrimary = document.getElementById("col-primary");
   const colSecondary = document.getElementById("col-secondary");
-  const topBar = document.querySelector(".widget-order-top-bar");
 
   if (!colPrimary || !colSecondary) return;
-
-  if (topBar && colPrimary.contains(topBar)) {
-    colPrimary.prepend(topBar);
-  }
 
   order.forEach((widgetId, idx) => {
     const widgetEl = document.getElementById(`widget-${widgetId}`);
@@ -442,93 +445,171 @@ function applyWidgetOrderToDOM(order) {
   checkAndApplyMarquees();
 }
 
-let tempWidgetOrder = [];
+function getCurrentDOMWidgetOrder() {
+  const colPrimary = document.getElementById("col-primary");
+  const colSecondary = document.getElementById("col-secondary");
+  const widgetsCol1 = colPrimary ? Array.from(colPrimary.querySelectorAll(".dashboard-widget")) : [];
+  const widgetsCol2 = colSecondary ? Array.from(colSecondary.querySelectorAll(".dashboard-widget")) : [];
+  
+  const currentWidgets = [...widgetsCol1, ...widgetsCol2];
+  const order = currentWidgets.map(w => w.dataset.widgetId).filter(Boolean);
 
-function renderWidgetOrderModalList() {
-  const listEl = document.getElementById("widget-order-list");
-  if (!listEl) return;
-
-  listEl.innerHTML = tempWidgetOrder.map((widgetId, idx) => {
-    const meta = WIDGET_META[widgetId] || { name: widgetId };
-    const isFirst = idx === 0;
-    const isLast = idx === tempWidgetOrder.length - 1;
-
-    return `
-      <div class="widget-order-item" data-index="${idx}">
-        <div class="widget-order-item-left">
-          <span class="widget-order-index">${idx + 1}</span>
-          <span class="widget-order-name">${meta.name}</span>
-        </div>
-        <div class="widget-order-btns">
-          <button type="button" class="btn-order-move btn-move-up" data-idx="${idx}" ${isFirst ? 'disabled' : ''} title="위로 이동">
-            <span class="material-symbols-outlined icon-small">arrow_upward</span>
-          </button>
-          <button type="button" class="btn-order-move btn-move-down" data-idx="${idx}" ${isLast ? 'disabled' : ''} title="아래로 이동">
-            <span class="material-symbols-outlined icon-small">arrow_downward</span>
-          </button>
-        </div>
-      </div>
-    `;
-  }).join("");
-
-  listEl.querySelectorAll(".btn-move-up").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const idx = Number(btn.dataset.idx);
-      if (idx > 0) {
-        const temp = tempWidgetOrder[idx];
-        tempWidgetOrder[idx] = tempWidgetOrder[idx - 1];
-        tempWidgetOrder[idx - 1] = temp;
-        renderWidgetOrderModalList();
-      }
-    });
+  DEFAULT_WIDGET_ORDER.forEach(id => {
+    if (!order.includes(id)) order.push(id);
   });
 
-  listEl.querySelectorAll(".btn-move-down").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const idx = Number(btn.dataset.idx);
-      if (idx < tempWidgetOrder.length - 1) {
-        const temp = tempWidgetOrder[idx];
-        tempWidgetOrder[idx] = tempWidgetOrder[idx + 1];
-        tempWidgetOrder[idx + 1] = temp;
-        renderWidgetOrderModalList();
-      }
-    });
-  });
+  return order;
+}
+
+function enterWidgetEditMode() {
+  if (isEditingWidgets) return;
+  isEditingWidgets = true;
+  document.body.classList.add("is-editing-widgets");
+
+  const doneBtn = document.getElementById("btn-done-widget-reorder");
+  if (doneBtn) doneBtn.classList.remove("is-hidden");
+
+  if (navigator.vibrate) {
+    try { navigator.vibrate(50); } catch(e) {}
+  }
+  showToast("위젯 순서 편집 모드 활성화 (드래그하여 이동)", "swap_vert");
+}
+
+function exitWidgetEditMode() {
+  if (!isEditingWidgets) return;
+  isEditingWidgets = false;
+  document.body.classList.remove("is-editing-widgets");
+
+  const doneBtn = document.getElementById("btn-done-widget-reorder");
+  if (doneBtn) doneBtn.classList.add("is-hidden");
+
+  const newOrder = getCurrentDOMWidgetOrder();
+  saveWidgetOrder(newOrder);
+
+  showToast("위젯 순서가 저장되었습니다.", "check_circle");
 }
 
 function initWidgetOrderManager() {
-  const openBtn = document.getElementById("btn-open-widget-order");
-  const closeBtn = document.getElementById("btn-close-widget-order");
-  const backdrop = document.getElementById("widget-order-modal-backdrop");
-  const saveBtn = document.getElementById("btn-save-widget-order");
-  const resetBtn = document.getElementById("btn-reset-widget-order");
-
-  if (openBtn) {
-    openBtn.addEventListener("click", () => {
-      tempWidgetOrder = getSavedWidgetOrder();
-      renderWidgetOrderModalList();
-      openModalView("widget-order-modal", "widget-order-modal-backdrop");
-    });
-  }
-
-  if (closeBtn) closeBtn.addEventListener("click", () => closeModalView("widget-order-modal"));
-  if (backdrop) backdrop.addEventListener("click", () => closeModalView("widget-order-modal"));
-
-  if (saveBtn) {
-    saveBtn.addEventListener("click", () => {
-      saveWidgetOrder(tempWidgetOrder);
-      closeModalView("widget-order-modal");
-    });
-  }
-
-  if (resetBtn) {
-    resetBtn.addEventListener("click", () => {
-      tempWidgetOrder = [...DEFAULT_WIDGET_ORDER];
-      renderWidgetOrderModalList();
-    });
-  }
-
   applyWidgetOrderToDOM(getSavedWidgetOrder());
+
+  const doneBtn = document.getElementById("btn-done-widget-reorder");
+  if (doneBtn) {
+    doneBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      exitWidgetEditMode();
+    });
+  }
+
+  // 편집 모드일 때 빈 배경 클릭 시 완료 처리
+  document.addEventListener("click", (e) => {
+    if (isEditingWidgets && !e.target.closest(".dashboard-widget") && !e.target.closest("#btn-done-widget-reorder")) {
+      exitWidgetEditMode();
+    }
+  });
+
+  const widgets = document.querySelectorAll(".dashboard-widget");
+
+  widgets.forEach(widget => {
+    let longPressTimer = null;
+    let startX = 0, startY = 0;
+
+    // 우클릭/길게 누름 시 나타나는 브라우저 기본 컨텍스트 메뉴 차단
+    widget.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+    });
+
+    // 🌟 롱프레스 및 터치/포인터 드래그 핸들러
+    widget.addEventListener("pointerdown", (e) => {
+      if (e.target.closest("button, input, select, textarea, a")) {
+        if (!isEditingWidgets) return;
+      }
+
+      startX = e.clientX;
+      startY = e.clientY;
+
+      if (!isEditingWidgets) {
+        // 0.5초(500ms) 길게 누르면 아이폰 지글 모드 발동
+        longPressTimer = setTimeout(() => {
+          enterWidgetEditMode();
+        }, 500);
+
+        const cancelLongPress = (moveEvent) => {
+          if (moveEvent && (Math.abs(moveEvent.clientX - startX) > 10 || Math.abs(moveEvent.clientY - startY) > 10)) {
+            clearTimeout(longPressTimer);
+            cleanupLongPress();
+          }
+        };
+
+        const endLongPress = () => {
+          clearTimeout(longPressTimer);
+          cleanupLongPress();
+        };
+
+        const cleanupLongPress = () => {
+          window.removeEventListener("pointermove", cancelLongPress);
+          window.removeEventListener("pointerup", endLongPress);
+          window.removeEventListener("pointercancel", endLongPress);
+        };
+
+        window.addEventListener("pointermove", cancelLongPress);
+        window.addEventListener("pointerup", endLongPress);
+        window.addEventListener("pointercancel", endLongPress);
+
+      } else {
+        // 이미 지글 모드인 경우: 즉시 드래그 준비
+        activeDragWidget = widget;
+        isPointerDragging = true;
+        try { widget.setPointerCapture(e.pointerId); } catch(err) {}
+        widget.classList.add("is-dragging");
+      }
+    });
+
+    // 🌟 위젯 드래그 중 실시간 위치 재배치
+    widget.addEventListener("pointermove", (e) => {
+      if (!isEditingWidgets || !isPointerDragging || activeDragWidget !== widget) return;
+      e.preventDefault();
+
+      widget.style.visibility = "hidden";
+      const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
+      widget.style.visibility = "";
+
+      if (!elemBelow) return;
+
+      const targetWidget = elemBelow.closest(".dashboard-widget");
+      const targetCol = elemBelow.closest(".grid-col");
+
+      if (targetWidget && targetWidget !== widget) {
+        const rect = targetWidget.getBoundingClientRect();
+        const isAfter = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+        targetWidget.parentNode.insertBefore(widget, isAfter ? targetWidget.nextSibling : targetWidget);
+      } else if (targetCol && targetCol !== widget.parentNode) {
+        targetCol.appendChild(widget);
+      }
+    });
+
+    const finishPointerDrag = (e) => {
+      if (activeDragWidget === widget) {
+        try { widget.releasePointerCapture(e.pointerId); } catch(err) {}
+        widget.classList.remove("is-dragging");
+        activeDragWidget = null;
+        isPointerDragging = false;
+
+        const newOrder = getCurrentDOMWidgetOrder();
+        saveWidgetOrder(newOrder);
+      }
+    };
+
+    widget.addEventListener("pointerup", finishPointerDrag);
+    widget.addEventListener("pointercancel", finishPointerDrag);
+
+    // 지글(편집) 모드일 때는 위젯 내부 버튼/달력 클릭 방지
+    widget.addEventListener("click", (e) => {
+      if (isEditingWidgets) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, true);
+  });
 }
 
 // ==========================================
@@ -554,7 +635,7 @@ function getOffWorkTime() {
   };
 }
 
-// 🌟 카운트다운 위젯 내 출퇴근 시간 텍스트 배지 실시간 갱신
+// 카운트다운 위젯 내 출퇴근 시간 텍스트 배지 실시간 갱신
 function updateWorkTimeDisplay() {
   const textEl = document.getElementById("countdown-work-time-text");
   if (textEl) {
@@ -564,7 +645,7 @@ function updateWorkTimeDisplay() {
   }
 }
 
-// 🌟 로그인 사용자의 출퇴근 시간 설정을 구글 시트 DB로 비동기 저장
+// 로그인 사용자의 출퇴근 시간 설정을 구글 시트 DB로 비동기 저장
 async function syncWorkTimeToServer() {
   const user = getCurrentUser();
   if (!user) return;
@@ -587,7 +668,7 @@ async function syncWorkTimeToServer() {
   }
 }
 
-// 🌟 개인정보 변경 모달 즉시 열기 (로그인 검증 및 기본값 채우기)
+// 개인정보 변경 모달 즉시 열기
 function openProfileEditModalDirectly() {
   const user = getCurrentUser();
   if (!user) {
@@ -612,7 +693,6 @@ function openProfileEditModalDirectly() {
   openModalView("profile-edit-modal", "profile-edit-modal-backdrop");
 }
 
-// 🌟 프로필 > 개인정보 변경 모달 제어 엔진
 function initProfileEditModal() {
   const form = document.getElementById("profile-edit-form");
   const closeBtn = document.getElementById("btn-close-profile-edit");
@@ -732,7 +812,7 @@ function initNavigationAndDrawers() {
   // 1) 메인 화면 '이번 달 달력' 우측 상단 '+' 버튼 클릭 -> 연차 관리 서랍 오픈
   if (mainAddLeaveBtn) mainAddLeaveBtn.addEventListener("click", openMyLeaveDrawer);
 
-  // 2) 메인 화면 '카운트다운' 우측 상단 '연필' 버튼 클릭 -> 개인정보 변경(근무 시간 설정) 팝업 오픈
+  // 2) 메인 화면 '카운트다운' 우측 상단 '연필' 버튼 클릭 -> 근무 시간 설정 모달 오픈
   if (editWorkTimeBtn) {
     editWorkTimeBtn.addEventListener("click", () => {
       openProfileEditModalDirectly();
@@ -3204,7 +3284,7 @@ async function init() {
   setupSimCalendarControls();
   setupLunchEngine();
   setupSlackingEngine();
-  initWidgetOrderManager();
+  initWidgetOrderManager(); // 🌟 아이폰 스타일 롱프레스 & 드래그 엔진 등록
   initLeaveRegisterForm();
   initPasswordChangeForm();
 
