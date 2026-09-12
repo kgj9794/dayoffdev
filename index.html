@@ -63,13 +63,19 @@
 
       <!-- 상단 우측 액션 영역 -->
       <div class="top-bar-right-actions">
+        <!-- 🌟 위젯 롱프레스(지글) 편집 모드 진입 시 활성화되는 완료 버튼 -->
+        <button type="button" class="top-bar-done-btn is-hidden" id="btn-done-widget-reorder" title="위젯 순서 편집 완료">
+          <span class="material-symbols-outlined">check</span>
+          <span>완료</span>
+        </button>
+
         <!-- 스크롤 시 게스트 버튼 왼쪽에 나타나는 피드백 버튼 -->
         <button type="button" class="top-bar-feedback-btn is-hidden" id="btn-top-feedback" title="피드백 작성">
           <span class="material-symbols-outlined">chat</span>
           <span class="btn-text">피드백</span>
         </button>
 
-        <!-- 👤 사용자 로그인 상태 / 프로필 버튼 (최상단 맨 오른쪽 위치) -->
+        <!-- 👤 사용자 로그인 상태 / 프로필 버튼 -->
         <button type="button" class="top-bar-user-btn" id="btn-top-user" title="내 계정 정보">
           <span class="material-symbols-outlined" style="font-size: 18px;">account_circle</span>
           <span class="user-name-text" id="top-user-name">로그인</span>
@@ -113,16 +119,8 @@
     <main class="responsive-dashboard-grid" id="main-dashboard-grid">
       <!-- 좌측 칼럼 영역 (4개 위젯) -->
       <div class="grid-col primary-col" id="col-primary">
-        
-        <!-- 위젯 순서 변경 버튼 바 -->
-        <div class="widget-order-top-bar">
-          <button type="button" class="btn-widget-reorder-main" id="btn-open-widget-order" title="대시보드 위젯 순서 변경">
-            <span class="material-symbols-outlined">swap_vert</span>
-            <span>메인 위젯 순서 변경</span>
-          </button>
-        </div>
 
-        <!-- 위젯 1: 실시간 쉬는 날 카운트다운 (헤더 우측 연필 버튼 포함) -->
+        <!-- 위젯 1: 실시간 쉬는 날 카운트다운 -->
         <section class="md-card hero-card dashboard-widget" data-widget-id="countdown" id="widget-countdown">
           <div class="card-header">
             <div>
@@ -191,7 +189,7 @@
           </div>
         </section>
 
-        <!-- 위젯 2: 현재 월 고정 달력 (날씨 표시 지원 & 연차 추가 버튼) -->
+        <!-- 위젯 2: 현재 월 고정 달력 -->
         <section class="md-card dashboard-widget" data-widget-id="calendar" id="widget-calendar">
           <div class="cal-nav-bar">
             <div class="cal-title-area">
@@ -360,7 +358,7 @@
     </div>
     
     <nav class="nav-menu-list">
-      <!-- 1. 미래 연차 시뮬레이터 (🌟 feature-item 형태로 통일하여 과도한 파란 배경 제거) -->
+      <!-- 1. 미래 연차 시뮬레이터 -->
       <button type="button" class="nav-menu-item feature-item" id="menu-open-simulator">
         <span class="material-symbols-outlined nav-item-icon" style="color: var(--md-sys-color-primary);">edit_calendar</span>
         <div class="nav-item-text">
@@ -964,40 +962,7 @@
   </aside>
 
   <!-- ==========================================
-       8. 메인 위젯 순서 설정 모달
-       ========================================== -->
-  <div class="modal-backdrop" id="widget-order-modal-backdrop"></div>
-  <div class="cal-detail-modal widget-order-modal" id="widget-order-modal" role="dialog" aria-modal="true">
-    <div class="modal-header">
-      <div class="modal-title-wrap">
-        <span class="material-symbols-outlined modal-icon" style="color: #005fb0;">swap_vert</span>
-        <div>
-          <h3 class="modal-date">메인 위젯 순서 설정</h3>
-          <span class="modal-status-badge normal">커스텀 배치</span>
-        </div>
-      </div>
-      <button type="button" class="md-icon-button modal-close-btn" id="btn-close-widget-order" aria-label="닫기">
-        <span class="material-symbols-outlined">close</span>
-      </button>
-    </div>
-    <div class="modal-body">
-      <p class="widget-order-guide">화살표(▲/▼)를 눌러 위젯의 표시 순서를 변경하세요.</p>
-      <div class="widget-order-list" id="widget-order-list"></div>
-      
-      <div class="widget-order-actions">
-        <button type="button" class="md-button md-button-text" id="btn-reset-widget-order">
-          <span class="material-symbols-outlined icon-small">restart_alt</span>
-          <span>기본 순서로 복원</span>
-        </button>
-        <button type="button" class="md-button sim-today-btn" id="btn-save-widget-order">
-          <span>완료</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==========================================
-       9. 달력 날짜 상세 모달
+       8. 달력 날짜 상세 모달
        ========================================== -->
   <div class="modal-backdrop" id="cal-modal-backdrop"></div>
   <div class="cal-detail-modal" id="cal-detail-modal" role="dialog" aria-modal="true">
@@ -1037,7 +1002,7 @@
   </div>
 
   <!-- ==========================================
-       10. 피드백 작성 모달
+       9. 피드백 작성 모달
        ========================================== -->
   <div class="modal-backdrop" id="feedback-modal-backdrop"></div>
   <div class="cal-detail-modal feedback-modal-card" id="feedback-modal" role="dialog" aria-modal="true">
@@ -1080,7 +1045,7 @@
   </div>
 
   <!-- ==========================================
-       11. 로그인 & 회원가입 모달
+       10. 로그인 & 회원가입 모달
        ========================================== -->
   <div class="modal-backdrop" id="auth-modal-backdrop"></div>
   <div class="cal-detail-modal auth-modal-card" id="auth-modal" role="dialog" aria-modal="true">
@@ -1155,7 +1120,7 @@
   </div>
 
   <!-- ==========================================
-       12. 개인정보 변경 전용 모달 (출퇴근 시간 설정)
+       11. 개인정보 변경 전용 모달 (출퇴근 시간 설정)
        ========================================== -->
   <div class="modal-backdrop" id="profile-edit-modal-backdrop"></div>
   <div class="cal-detail-modal auth-modal-card" id="profile-edit-modal" role="dialog" aria-modal="true">
@@ -1193,7 +1158,7 @@
   </div>
 
   <!-- ==========================================
-       13. 비밀번호 변경 전용 모달
+       12. 비밀번호 변경 전용 모달
        ========================================== -->
   <div class="modal-backdrop" id="pw-change-modal-backdrop"></div>
   <div class="cal-detail-modal auth-modal-card" id="pw-change-modal" role="dialog" aria-modal="true">
