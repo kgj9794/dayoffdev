@@ -486,7 +486,7 @@ body.is-loading {
   white-space: nowrap;
 }
 
-/* 🌟 상단 피드백 버튼 */
+/* 🌟 상단 피드백 버튼 (게스트 버튼과 동일 크기, 부드러운 양방향 애니메이션) */
 .top-bar-feedback-btn {
   display: inline-flex;
   align-items: center;
@@ -2440,10 +2440,10 @@ body.is-loading {
 }
 
 /* ==========================================
-   12. 🌟 아이폰 홈 화면 스타일 위젯 지글 & 드래그 엔진
+   12. 🌟 위젯 지글(Jiggle) & 실시간 드래그/가이드라인 엔진
    ========================================== */
 
-/* 위젯 길게 누를 때 글자/이미지 복사 돋보기 팝업 원천 차단 */
+/* 텍스트/이미지 복사 돋보기 팝업 원천 차단 */
 .dashboard-widget,
 .dashboard-widget * {
   -webkit-touch-callout: none !important;
@@ -2453,15 +2453,55 @@ body.is-loading {
   user-select: none !important;
 }
 
-/* 지글(편집) 모드 활성화 시 각 위젯이 아이폰처럼 덜덜 떨림 */
+/* 편집 모드 진입 시 최상단 '기본 순서로 초기화' 바 */
+.widget-reset-bar {
+  display: none;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: -4px;
+  animation: feedbackDropBounce 0.32s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+body.is-editing-widgets .widget-reset-bar {
+  display: flex;
+}
+
+.btn-reset-widgets-jiggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: var(--md-shape-corner-full);
+  background-color: var(--md-sys-color-surface);
+  border: 1.5px solid var(--card-border-color);
+  color: var(--md-sys-color-outline);
+  font-size: 0.8125rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: var(--md-elevation-1);
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.btn-reset-widgets-jiggle:hover {
+  background-color: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-primary);
+  border-color: var(--md-sys-color-primary);
+  transform: translateY(-1px);
+}
+
+.btn-reset-widgets-jiggle .material-symbols-outlined {
+  font-size: 18px;
+}
+
+/* 편집 모드 활성화 시 아이폰 스타일 덜덜 떨림 */
 body.is-editing-widgets .dashboard-widget {
   animation: widgetJiggle 0.28s infinite alternate ease-in-out;
   cursor: grab;
   position: relative;
-  touch-action: none; /* 드래그 중 브라우저 스크롤 방지 */
+  touch-action: none; /* 모바일 드래그 중 스크롤 방지 */
 }
 
-/* 홀수/짝수 위젯의 각도와 속도를 엇갈리게 하여 리얼한 진동감 연출 */
 body.is-editing-widgets .dashboard-widget:nth-child(even) {
   animation-name: widgetJiggleAlt;
   animation-duration: 0.32s;
@@ -2479,20 +2519,42 @@ body.is-editing-widgets .dashboard-widget:nth-child(even) {
   100% { transform: rotate(0.9deg) translate3d(0.5px, 0.5px, 0); }
 }
 
-/* 드래그 중인 위젯: 살짝 커지며 떠오르고 그림자가 짙어짐 */
+/* 🌟 드래그 중인 위젯 (손가락/마우스를 따라다니는 플로팅 상태) */
 body.is-editing-widgets .dashboard-widget.is-dragging {
   animation: none !important;
-  transform: scale(1.035) translate3d(0, 0, 0) !important;
-  opacity: 0.94;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3) !important;
-  z-index: 1000 !important;
-  cursor: grabbing;
+  opacity: 0.92 !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35) !important;
+  z-index: 9999 !important;
+  pointer-events: none !important; /* 아래의 위젯 감지를 위해 이벤트 통과 */
+  transform: scale(1.04) !important;
 }
 
-/* 드래그 위젯이 다른 위젯 영역 위로 올라갔을 때 위치 안내 가이드 */
-.dashboard-widget.drag-over {
-  outline: 2px dashed var(--md-sys-color-primary) !important;
-  outline-offset: 4px;
+/* 🌟 이동할 자리를 명확하게 보여주는 시각 가이드라인 박스 */
+.widget-drop-placeholder {
+  width: 100%;
+  box-sizing: border-box;
+  border: 2px dashed var(--md-sys-color-primary) !important;
+  background-color: var(--md-sys-color-primary-container) !important;
+  border-radius: var(--md-shape-corner-large);
+  opacity: 0.65;
+  transition: height 0.2s cubic-bezier(0.2, 0, 0, 1), margin 0.2s ease;
+  animation: placeholderPulse 1.2s infinite ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.widget-drop-placeholder::after {
+  content: "여기로 이동";
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: var(--md-sys-color-primary);
+  opacity: 0.9;
+}
+
+@keyframes placeholderPulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.85; }
 }
 
 /* ==========================================
@@ -2653,23 +2715,56 @@ body.is-editing-widgets .dashboard-widget.is-dragging {
   display: block;
 }
 
-/* Safari/iOS input[type="time"] 전용 크로스 브라우징 보정 */
-input[type="time"].fb-select {
+/* 🌟 Safari/Chrome 공통 출퇴근 시간 시계 아이콘 래퍼 */
+.time-picker-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.time-picker-input {
+  width: 100% !important;
+  padding-right: 40px !important; /* 우측 시계 기호 공간 확보 */
+  cursor: pointer;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  display: block;
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
   box-sizing: border-box !important;
 }
 
-input[type="time"].fb-select::-webkit-date-and-time-value {
+.time-picker-input::-webkit-date-and-time-value {
   text-align: left;
   min-height: 1.25em;
   display: flex;
   align-items: center;
+}
+
+/* Safari 및 모바일 WebKit 네이티브 피커 인디케이터 투명 확장 */
+.time-picker-input::-webkit-calendar-picker-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* 항상 우측에 확실하게 보이는 커스텀 시계 아이콘 */
+.time-picker-icon {
+  position: absolute;
+  right: 12px;
+  font-size: 20px;
+  color: var(--md-sys-color-primary);
+  pointer-events: none;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .fb-select:focus, .fb-textarea:focus {
@@ -2942,6 +3037,9 @@ input[type="time"].fb-select::-webkit-date-and-time-value {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 24px;
     align-items: start;
+  }
+  .widget-reset-bar {
+    grid-column: 1 / -1;
   }
   .calendar-viewport { min-height: 380px; }
   .cal-cell { min-height: 72px; padding: 6px 8px; }
