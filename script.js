@@ -399,7 +399,7 @@ function initGlobalHistoryAndEscListener() {
 }
 
 // ==========================================
-// 4. 🌟 아이폰 스타일 롱프레스 지글 & 드래그 앤 드롭 엔진
+// 4. 🌟 위젯 순서 변경 엔진 (모바일 드래그 & 플레이스홀더 가이드)
 // ==========================================
 let isEditingWidgets = false;
 let activeDragWidget = null;
@@ -472,7 +472,7 @@ function enterWidgetEditMode() {
   if (navigator.vibrate) {
     try { navigator.vibrate(50); } catch(e) {}
   }
-  showToast("위젯 순서 편집 모드 활성화 (드래그하여 이동)", "swap_vert");
+  showToast("위젯 순서 변경 모드 활성화 (위젯을 끌어서 이동)", "swap_vert");
 }
 
 function exitWidgetEditMode() {
@@ -489,7 +489,40 @@ function exitWidgetEditMode() {
   showToast("위젯 순서가 저장되었습니다.", "check_circle");
 }
 
+// 대시보드 최상단 '기본 순서로 초기화' 버튼 이벤트 연동
+function ensureWidgetResetBar() {
+  let resetBar = document.getElementById("widget-reset-bar");
+  if (!resetBar) {
+    const grid = document.getElementById("main-dashboard-grid");
+    if (grid) {
+      resetBar = document.createElement("div");
+      resetBar.className = "widget-reset-bar";
+      resetBar.id = "widget-reset-bar";
+      resetBar.innerHTML = `
+        <button type="button" class="btn-reset-widgets-jiggle" id="btn-reset-widgets-jiggle" title="위젯 기본 순서로 초기화">
+          <span class="material-symbols-outlined">restart_alt</span>
+          <span>기본 순서로 초기화</span>
+        </button>
+      `;
+      grid.prepend(resetBar);
+    }
+  }
+
+  const resetBtn = document.getElementById("btn-reset-widgets-jiggle");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      saveWidgetOrder([...DEFAULT_WIDGET_ORDER]);
+      if (navigator.vibrate) {
+        try { navigator.vibrate(40); } catch(err) {}
+      }
+      showToast("위젯 순서가 기본 설정으로 초기화되었습니다.", "restart_alt");
+    });
+  }
+}
+
 function initWidgetOrderManager() {
+  ensureWidgetResetBar();
   applyWidgetOrderToDOM(getSavedWidgetOrder());
 
   const doneBtn = document.getElementById("btn-done-widget-reorder");
@@ -502,107 +535,122 @@ function initWidgetOrderManager() {
 
   // 편집 모드일 때 빈 배경 클릭 시 완료 처리
   document.addEventListener("click", (e) => {
-    if (isEditingWidgets && !e.target.closest(".dashboard-widget") && !e.target.closest("#btn-done-widget-reorder")) {
+    if (isEditingWidgets && 
+        !e.target.closest(".dashboard-widget") && 
+        !e.target.closest("#btn-done-widget-reorder") &&
+        !e.target.closest(".widget-reset-bar") &&
+        !e.target.closest("#nav-drawer")) {
       exitWidgetEditMode();
     }
   });
 
   const widgets = document.querySelectorAll(".dashboard-widget");
+  let placeholder = null;
 
   widgets.forEach(widget => {
-    let longPressTimer = null;
-    let startX = 0, startY = 0;
+    let startPointerX = 0;
+    let startPointerY = 0;
+    let widgetOrigRect = null;
 
-    // 우클릭/길게 누름 시 나타나는 브라우저 기본 컨텍스트 메뉴 차단
     widget.addEventListener("contextmenu", (e) => {
-      e.preventDefault();
+      if (isEditingWidgets) e.preventDefault();
     });
 
-    // 🌟 롱프레스 및 터치/포인터 드래그 핸들러
+    // 🌟 모바일(갤럭시/아이폰) 및 PC 통합 드래그 핸들러
     widget.addEventListener("pointerdown", (e) => {
-      if (e.target.closest("button, input, select, textarea, a")) {
-        if (!isEditingWidgets) return;
-      }
+      if (!isEditingWidgets) return;
+      if (e.target.closest("button, input, select, textarea, a")) return;
 
-      startX = e.clientX;
-      startY = e.clientY;
+      e.preventDefault();
+      activeDragWidget = widget;
+      isPointerDragging = true;
 
-      if (!isEditingWidgets) {
-        // 0.5초(500ms) 길게 누르면 아이폰 지글 모드 발동
-        longPressTimer = setTimeout(() => {
-          enterWidgetEditMode();
-        }, 500);
+      startPointerX = e.clientX;
+      startPointerY = e.clientY;
+      widgetOrigRect = widget.getBoundingClientRect();
 
-        const cancelLongPress = (moveEvent) => {
-          if (moveEvent && (Math.abs(moveEvent.clientX - startX) > 10 || Math.abs(moveEvent.clientY - startY) > 10)) {
-            clearTimeout(longPressTimer);
-            cleanupLongPress();
-          }
-        };
+      // 드롭 위치 가이드라인 플레이스홀더 생성
+      placeholder = document.createElement("div");
+      placeholder.className = "widget-drop-placeholder";
+      placeholder.style.height = `${widgetOrigRect.height}px`;
 
-        const endLongPress = () => {
-          clearTimeout(longPressTimer);
-          cleanupLongPress();
-        };
+      // 위젯 자리에 플레이스홀더를 먼저 배치
+      widget.parentNode.insertBefore(placeholder, widget);
 
-        const cleanupLongPress = () => {
-          window.removeEventListener("pointermove", cancelLongPress);
-          window.removeEventListener("pointerup", endLongPress);
-          window.removeEventListener("pointercancel", endLongPress);
-        };
+      // 위젯을 플로팅 상태로 전환하여 손가락을 추적
+      widget.classList.add("is-dragging");
+      widget.style.position = "fixed";
+      widget.style.top = `${widgetOrigRect.top}px`;
+      widget.style.left = `${widgetOrigRect.left}px`;
+      widget.style.width = `${widgetOrigRect.width}px`;
+      widget.style.zIndex = "9999";
+      widget.style.transform = "scale(1.04)";
 
-        window.addEventListener("pointermove", cancelLongPress);
-        window.addEventListener("pointerup", endLongPress);
-        window.addEventListener("pointercancel", endLongPress);
-
-      } else {
-        // 이미 지글 모드인 경우: 즉시 드래그 준비
-        activeDragWidget = widget;
-        isPointerDragging = true;
-        try { widget.setPointerCapture(e.pointerId); } catch(err) {}
-        widget.classList.add("is-dragging");
-      }
+      try {
+        widget.setPointerCapture(e.pointerId);
+      } catch (err) {}
     });
 
-    // 🌟 위젯 드래그 중 실시간 위치 재배치
     widget.addEventListener("pointermove", (e) => {
       if (!isEditingWidgets || !isPointerDragging || activeDragWidget !== widget) return;
       e.preventDefault();
 
-      widget.style.visibility = "hidden";
+      const dx = e.clientX - startPointerX;
+      const dy = e.clientY - startPointerY;
+      widget.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(1.04)`;
+
+      // 손가락 바로 아래 위치한 DOM 감지
+      widget.style.display = "none";
       const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
-      widget.style.visibility = "";
+      widget.style.display = "";
 
       if (!elemBelow) return;
 
-      const targetWidget = elemBelow.closest(".dashboard-widget");
+      const targetWidget = elemBelow.closest(".dashboard-widget:not(.is-dragging)");
       const targetCol = elemBelow.closest(".grid-col");
 
-      if (targetWidget && targetWidget !== widget) {
+      if (targetWidget && placeholder) {
         const rect = targetWidget.getBoundingClientRect();
         const isAfter = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
-        targetWidget.parentNode.insertBefore(widget, isAfter ? targetWidget.nextSibling : targetWidget);
-      } else if (targetCol && targetCol !== widget.parentNode) {
-        targetCol.appendChild(widget);
+        targetWidget.parentNode.insertBefore(placeholder, isAfter ? targetWidget.nextSibling : targetWidget);
+      } else if (targetCol && placeholder && targetCol !== placeholder.parentNode) {
+        targetCol.appendChild(placeholder);
       }
     });
 
     const finishPointerDrag = (e) => {
-      if (activeDragWidget === widget) {
-        try { widget.releasePointerCapture(e.pointerId); } catch(err) {}
-        widget.classList.remove("is-dragging");
-        activeDragWidget = null;
-        isPointerDragging = false;
+      if (activeDragWidget !== widget) return;
 
-        const newOrder = getCurrentDOMWidgetOrder();
-        saveWidgetOrder(newOrder);
+      try {
+        widget.releasePointerCapture(e.pointerId);
+      } catch (err) {}
+
+      // 플레이스홀더가 위치한 자리에 위젯 배치
+      if (placeholder && placeholder.parentNode) {
+        placeholder.parentNode.insertBefore(widget, placeholder);
+        placeholder.remove();
+        placeholder = null;
       }
+
+      // 인라인 스타일 완전 초기화
+      widget.style.position = "";
+      widget.style.top = "";
+      widget.style.left = "";
+      widget.style.width = "";
+      widget.style.zIndex = "";
+      widget.style.transform = "";
+      widget.classList.remove("is-dragging");
+
+      activeDragWidget = null;
+      isPointerDragging = false;
+
+      const newOrder = getCurrentDOMWidgetOrder();
+      saveWidgetOrder(newOrder);
     };
 
     widget.addEventListener("pointerup", finishPointerDrag);
     widget.addEventListener("pointercancel", finishPointerDrag);
 
-    // 지글(편집) 모드일 때는 위젯 내부 버튼/달력 클릭 방지
     widget.addEventListener("click", (e) => {
       if (isEditingWidgets) {
         e.preventDefault();
@@ -777,7 +825,7 @@ function initNavigationAndDrawers() {
   const closeNavBtn = document.getElementById("btn-close-nav-menu");
   const navBackdrop = document.getElementById("nav-drawer-backdrop");
 
-  const mainAddLeaveBtn = document.getElementById("btn-main-add-leave"); // 메인 화면 달력의 '+' 버튼
+  const mainAddLeaveBtn = document.getElementById("btn-main-add-leave"); // 메인 화면 달력 '+' 버튼
   const editWorkTimeBtn = document.getElementById("btn-edit-work-time"); // 카운트다운 연필 버튼
   const closeMyLeaveBtn = document.getElementById("btn-close-my-leave");
   const myLeaveBackdrop = document.getElementById("my-leave-drawer-backdrop");
@@ -794,6 +842,9 @@ function initNavigationAndDrawers() {
   const closeSlackingBtn = document.getElementById("btn-close-slacking");
   const slackingBackdrop = document.getElementById("slacking-drawer-backdrop");
 
+  // 🌟 햄버거 메뉴 내 '위젯 순서 변경' 메뉴 버튼
+  const openWidgetReorderBtn = document.getElementById("menu-open-widget-reorder");
+
   if (openNavBtn) {
     openNavBtn.addEventListener("click", () => {
       closeProfilePopup();
@@ -809,10 +860,20 @@ function initNavigationAndDrawers() {
   if (closeNavBtn) closeNavBtn.addEventListener("click", () => closeModalView("nav-drawer"));
   if (navBackdrop) navBackdrop.addEventListener("click", () => closeModalView("nav-drawer"));
 
-  // 1) 메인 화면 '이번 달 달력' 우측 상단 '+' 버튼 클릭 -> 연차 관리 서랍 오픈
+  // 1) 🌟 햄버거 메뉴에서 '위젯 순서 변경' 클릭 시 메뉴를 닫고 편집 모드로 진입
+  if (openWidgetReorderBtn) {
+    openWidgetReorderBtn.addEventListener("click", () => {
+      closeModalView("nav-drawer");
+      setTimeout(() => {
+        enterWidgetEditMode();
+      }, 250);
+    });
+  }
+
+  // 2) 메인 화면 '이번 달 달력' 우측 상단 '+' 버튼 클릭 -> 연차 관리 서랍 오픈
   if (mainAddLeaveBtn) mainAddLeaveBtn.addEventListener("click", openMyLeaveDrawer);
 
-  // 2) 메인 화면 '카운트다운' 우측 상단 '연필' 버튼 클릭 -> 근무 시간 설정 모달 오픈
+  // 3) 메인 화면 '카운트다운' 우측 상단 '연필' 버튼 클릭 -> 근무 시간 설정 모달 오픈
   if (editWorkTimeBtn) {
     editWorkTimeBtn.addEventListener("click", () => {
       openProfileEditModalDirectly();
@@ -2417,7 +2478,7 @@ function calculateVacationsForBase(baseDay) {
               benefit: `총 ${blockLength + 1}일 연속 휴식 (${formatDateMD(blockStart)} ~ ${formatDateMD(dayAfter)})`,
               badge: `연차 1일 = ${blockLength + 1}일 휴식`,
               totalRest: blockLength + 1,
-              startDate: blockStart,
+              startDate: dayBefore,
               endDate: dayAfter
             });
           }
@@ -3284,7 +3345,7 @@ async function init() {
   setupSimCalendarControls();
   setupLunchEngine();
   setupSlackingEngine();
-  initWidgetOrderManager(); // 🌟 아이폰 스타일 롱프레스 & 드래그 엔진 등록
+  initWidgetOrderManager(); // 🌟 모바일 실시간 드래그 & 플레이스홀더 순서 변경 엔진 등록
   initLeaveRegisterForm();
   initPasswordChangeForm();
 
