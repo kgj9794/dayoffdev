@@ -63,8 +63,8 @@
 
       <!-- 상단 우측 액션 영역 -->
       <div class="top-bar-right-actions">
-        <!-- 🌟 위젯 롱프레스(지글) 편집 모드 진입 시 활성화되는 완료 버튼 -->
-        <button type="button" class="top-bar-done-btn is-hidden" id="btn-done-widget-reorder" title="위젯 순서 편집 완료">
+        <!-- 🌟 위젯 순서 변경 모드 활성화 시 나타나는 완료 버튼 -->
+        <button type="button" class="top-bar-done-btn is-hidden" id="btn-done-widget-reorder" title="위젯 순서 변경 완료">
           <span class="material-symbols-outlined">check</span>
           <span>완료</span>
         </button>
@@ -117,6 +117,14 @@
        ========================================== -->
   <div class="app-layout">
     <main class="responsive-dashboard-grid" id="main-dashboard-grid">
+      <!-- 🌟 위젯 순서 변경 모드 진입 시 최상단에 나타나는 초기화 바 -->
+      <div class="widget-reset-bar" id="widget-reset-bar">
+        <button type="button" class="btn-reset-widgets-jiggle" id="btn-reset-widgets-jiggle" title="위젯 기본 순서로 초기화">
+          <span class="material-symbols-outlined">restart_alt</span>
+          <span>기본 순서로 초기화</span>
+        </button>
+      </div>
+
       <!-- 좌측 칼럼 영역 (4개 위젯) -->
       <div class="grid-col primary-col" id="col-primary">
 
@@ -267,7 +275,7 @@
               <div class="stat-content">
                 <span class="stat-label">주말 (토/일)</span>
                 <span class="stat-value" id="main-stat-weekend-days">0일</span>
-                <span class="stat-sub" id="main-stat-weekend-detail">토 0일 / 일 0일</span>
+                <span class="stat-sub" id="sim-stat-weekend-detail">토 0일 / 일 0일</span>
               </div>
               <span class="material-symbols-outlined stat-icon">weekend</span>
             </div>
@@ -285,7 +293,7 @@
               <div class="stat-content">
                 <span class="stat-label">실제 출근일</span>
                 <span class="stat-value" id="main-stat-work-days">0일</span>
-                <span class="stat-sub" id="main-stat-work-percent">근무 비율 0%</span>
+                <span class="stat-sub" id="sim-stat-work-percent">근무 비율 0%</span>
               </div>
               <span class="material-symbols-outlined stat-icon">work</span>
             </div>
@@ -384,6 +392,18 @@
         <div class="nav-item-text">
           <span class="nav-item-title">합법적 월급 루팡 가이드</span>
           <span class="nav-item-desc">시간 때우기 꿀팁 & 실시간 루팡 급여 계산기</span>
+        </div>
+        <span class="material-symbols-outlined nav-item-arrow">chevron_right</span>
+      </button>
+
+      <div class="nav-section-label">설정 및 관리</div>
+
+      <!-- 🌟 4. 햄버거 메뉴에서 진입하는 위젯 순서 변경 버튼 -->
+      <button type="button" class="nav-menu-item feature-item" id="menu-open-widget-reorder">
+        <span class="material-symbols-outlined nav-item-icon" style="color: #059669;">dashboard_customize</span>
+        <div class="nav-item-text">
+          <span class="nav-item-title">메인 위젯 순서 변경</span>
+          <span class="nav-item-desc">대시보드 위젯 드래그 배치 모드 진입</span>
         </div>
         <span class="material-symbols-outlined nav-item-arrow">chevron_right</span>
       </button>
@@ -1120,7 +1140,7 @@
   </div>
 
   <!-- ==========================================
-       11. 개인정보 변경 전용 모달 (출퇴근 시간 설정)
+       11. 개인정보 변경 전용 모달 (출퇴근 시간 설정 + 🌟 Safari 시계 아이콘 래퍼)
        ========================================== -->
   <div class="modal-backdrop" id="profile-edit-modal-backdrop"></div>
   <div class="cal-detail-modal auth-modal-card" id="profile-edit-modal" role="dialog" aria-modal="true">
@@ -1139,14 +1159,22 @@
 
     <div class="modal-body">
       <form id="profile-edit-form" class="feedback-form-content">
+        <!-- 🌟 출근 시간 인풋 + 우측 시계 기호 래퍼 -->
         <div class="form-group-item">
           <label for="edit-start-work-time" class="fb-label">출근 시간</label>
-          <input type="time" id="edit-start-work-time" class="fb-select" required />
+          <div class="time-picker-wrapper">
+            <input type="time" id="edit-start-work-time" class="fb-select time-picker-input" required />
+            <span class="material-symbols-outlined time-picker-icon" aria-hidden="true">schedule</span>
+          </div>
         </div>
 
+        <!-- 🌟 퇴근 시간 인풋 + 우측 시계 기호 래퍼 -->
         <div class="form-group-item">
           <label for="edit-off-work-time" class="fb-label">퇴근 시간</label>
-          <input type="time" id="edit-off-work-time" class="fb-select" required />
+          <div class="time-picker-wrapper">
+            <input type="time" id="edit-off-work-time" class="fb-select time-picker-input" required />
+            <span class="material-symbols-outlined time-picker-icon" aria-hidden="true">schedule</span>
+          </div>
         </div>
 
         <button type="submit" id="btn-profile-edit-submit" class="fb-submit-btn" style="margin-top: 6px;">
