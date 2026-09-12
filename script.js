@@ -399,11 +399,10 @@ function initGlobalHistoryAndEscListener() {
 }
 
 // ==========================================
-// 4. 🌟 위젯 순서 변경 엔진 (모바일 드래그 & 플레이스홀더 가이드)
+// 4. 🌟 위젯 순서 변경 엔진 (터치 선택 & 이동 슬롯 시스템)
 // ==========================================
 let isEditingWidgets = false;
-let activeDragWidget = null;
-let isPointerDragging = false;
+let selectedWidget = null;
 
 function getSavedWidgetOrder() {
   try {
@@ -472,7 +471,7 @@ function enterWidgetEditMode() {
   if (navigator.vibrate) {
     try { navigator.vibrate(50); } catch(e) {}
   }
-  showToast("위젯 순서 변경 모드 활성화 (위젯을 끌어서 이동)", "swap_vert");
+  showToast("순서를 바꿀 위젯을 터치해 선택하세요.", "touch_app");
 }
 
 function exitWidgetEditMode() {
@@ -483,13 +482,92 @@ function exitWidgetEditMode() {
   const doneBtn = document.getElementById("btn-done-widget-reorder");
   if (doneBtn) doneBtn.classList.add("is-hidden");
 
+  clearInsertSlots();
+  if (selectedWidget) {
+    selectedWidget.classList.remove("is-selected");
+    selectedWidget = null;
+  }
+
   const newOrder = getCurrentDOMWidgetOrder();
   saveWidgetOrder(newOrder);
 
   showToast("위젯 순서가 저장되었습니다.", "check_circle");
 }
 
-// 대시보드 최상단 '기본 순서로 초기화' 버튼 이벤트 연동
+function clearInsertSlots() {
+  document.querySelectorAll(".widget-insert-slot").forEach(s => s.remove());
+}
+
+function createSlotElement(insertCallback) {
+  const slot = document.createElement("div");
+  slot.className = "widget-insert-slot";
+  slot.innerHTML = `
+    <span class="material-symbols-outlined">add_circle</span>
+    <span>여기로 이동</span>
+  `;
+
+  slot.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!selectedWidget) return;
+
+    insertCallback();
+    clearInsertSlots();
+
+    selectedWidget.classList.remove("is-selected");
+    selectedWidget = null;
+
+    const newOrder = getCurrentDOMWidgetOrder();
+    saveWidgetOrder(newOrder);
+
+    if (navigator.vibrate) {
+      try { navigator.vibrate(35); } catch(err) {}
+    }
+    showToast("위젯 위치가 이동되었습니다.", "check_circle");
+  });
+
+  return slot;
+}
+
+// 🌟 선택된 위젯을 이동할 수 있는 사이사이 슬롯 생성
+function renderInsertSlots(targetWidget) {
+  clearInsertSlots();
+  if (!targetWidget) return;
+
+  const cols = [
+    document.getElementById("col-primary"),
+    document.getElementById("col-secondary")
+  ].filter(Boolean);
+
+  cols.forEach(col => {
+    const widgets = Array.from(col.querySelectorAll(".dashboard-widget"));
+
+    if (widgets.length === 0) {
+      const slot = createSlotElement(() => col.appendChild(targetWidget));
+      col.appendChild(slot);
+      return;
+    }
+
+    widgets.forEach((w, idx) => {
+      const prevWidget = idx > 0 ? widgets[idx - 1] : null;
+      // 선택된 위젯의 바로 앞뒤 위치는 이동이 무의미하므로 제외
+      const isRedundantBefore = (w === targetWidget) || (prevWidget === targetWidget);
+
+      if (!isRedundantBefore) {
+        const slotBefore = createSlotElement(() => col.insertBefore(targetWidget, w));
+        col.insertBefore(slotBefore, w);
+      }
+
+      // 칼럼의 마지막 위젯 뒤 슬롯
+      if (idx === widgets.length - 1 && w !== targetWidget) {
+        const slotAfter = createSlotElement(() => col.appendChild(targetWidget));
+        col.appendChild(slotAfter);
+      }
+    });
+  });
+}
+
 function ensureWidgetResetBar() {
   let resetBar = document.getElementById("widget-reset-bar");
   if (!resetBar) {
@@ -512,6 +590,11 @@ function ensureWidgetResetBar() {
   if (resetBtn) {
     resetBtn.addEventListener("click", (e) => {
       e.stopPropagation();
+      clearInsertSlots();
+      if (selectedWidget) {
+        selectedWidget.classList.remove("is-selected");
+        selectedWidget = null;
+      }
       saveWidgetOrder([...DEFAULT_WIDGET_ORDER]);
       if (navigator.vibrate) {
         try { navigator.vibrate(40); } catch(err) {}
@@ -539,124 +622,51 @@ function initWidgetOrderManager() {
         !e.target.closest(".dashboard-widget") && 
         !e.target.closest("#btn-done-widget-reorder") &&
         !e.target.closest(".widget-reset-bar") &&
+        !e.target.closest(".widget-insert-slot") &&
         !e.target.closest("#nav-drawer")) {
       exitWidgetEditMode();
     }
   });
 
   const widgets = document.querySelectorAll(".dashboard-widget");
-  let placeholder = null;
 
   widgets.forEach(widget => {
-    let startPointerX = 0;
-    let startPointerY = 0;
-    let widgetOrigRect = null;
-
     widget.addEventListener("contextmenu", (e) => {
       if (isEditingWidgets) e.preventDefault();
     });
 
-    // 🌟 모바일(갤럭시/아이폰) 및 PC 통합 드래그 핸들러
-    widget.addEventListener("pointerdown", (e) => {
-      if (!isEditingWidgets) return;
-      if (e.target.closest("button, input, select, textarea, a")) return;
-
-      e.preventDefault();
-      activeDragWidget = widget;
-      isPointerDragging = true;
-
-      startPointerX = e.clientX;
-      startPointerY = e.clientY;
-      widgetOrigRect = widget.getBoundingClientRect();
-
-      // 드롭 위치 가이드라인 플레이스홀더 생성
-      placeholder = document.createElement("div");
-      placeholder.className = "widget-drop-placeholder";
-      placeholder.style.height = `${widgetOrigRect.height}px`;
-
-      // 위젯 자리에 플레이스홀더를 먼저 배치
-      widget.parentNode.insertBefore(placeholder, widget);
-
-      // 위젯을 플로팅 상태로 전환하여 손가락을 추적
-      widget.classList.add("is-dragging");
-      widget.style.position = "fixed";
-      widget.style.top = `${widgetOrigRect.top}px`;
-      widget.style.left = `${widgetOrigRect.left}px`;
-      widget.style.width = `${widgetOrigRect.width}px`;
-      widget.style.zIndex = "9999";
-      widget.style.transform = "scale(1.04)";
-
-      try {
-        widget.setPointerCapture(e.pointerId);
-      } catch (err) {}
-    });
-
-    widget.addEventListener("pointermove", (e) => {
-      if (!isEditingWidgets || !isPointerDragging || activeDragWidget !== widget) return;
-      e.preventDefault();
-
-      const dx = e.clientX - startPointerX;
-      const dy = e.clientY - startPointerY;
-      widget.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(1.04)`;
-
-      // 손가락 바로 아래 위치한 DOM 감지
-      widget.style.display = "none";
-      const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
-      widget.style.display = "";
-
-      if (!elemBelow) return;
-
-      const targetWidget = elemBelow.closest(".dashboard-widget:not(.is-dragging)");
-      const targetCol = elemBelow.closest(".grid-col");
-
-      if (targetWidget && placeholder) {
-        const rect = targetWidget.getBoundingClientRect();
-        const isAfter = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
-        targetWidget.parentNode.insertBefore(placeholder, isAfter ? targetWidget.nextSibling : targetWidget);
-      } else if (targetCol && placeholder && targetCol !== placeholder.parentNode) {
-        targetCol.appendChild(placeholder);
-      }
-    });
-
-    const finishPointerDrag = (e) => {
-      if (activeDragWidget !== widget) return;
-
-      try {
-        widget.releasePointerCapture(e.pointerId);
-      } catch (err) {}
-
-      // 플레이스홀더가 위치한 자리에 위젯 배치
-      if (placeholder && placeholder.parentNode) {
-        placeholder.parentNode.insertBefore(widget, placeholder);
-        placeholder.remove();
-        placeholder = null;
-      }
-
-      // 인라인 스타일 완전 초기화
-      widget.style.position = "";
-      widget.style.top = "";
-      widget.style.left = "";
-      widget.style.width = "";
-      widget.style.zIndex = "";
-      widget.style.transform = "";
-      widget.classList.remove("is-dragging");
-
-      activeDragWidget = null;
-      isPointerDragging = false;
-
-      const newOrder = getCurrentDOMWidgetOrder();
-      saveWidgetOrder(newOrder);
-    };
-
-    widget.addEventListener("pointerup", finishPointerDrag);
-    widget.addEventListener("pointercancel", finishPointerDrag);
-
+    // 🌟 위젯 터치 선택 핸들러 (모바일 스크롤 충돌 없이 깔끔하게 동작)
     widget.addEventListener("click", (e) => {
-      if (isEditingWidgets) {
-        e.preventDefault();
-        e.stopPropagation();
+      if (!isEditingWidgets) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const widgetMeta = WIDGET_META[widget.dataset.widgetId] || { name: "위젯" };
+
+      // 이미 선택된 위젯을 다시 누른 경우: 선택 해제
+      if (selectedWidget === widget) {
+        widget.classList.remove("is-selected");
+        selectedWidget = null;
+        clearInsertSlots();
+        showToast("선택이 해제되었습니다.", "close");
+        return;
       }
-    }, true);
+
+      // 다른 위젯이 이미 선택되어 있었다면 해제
+      if (selectedWidget) {
+        selectedWidget.classList.remove("is-selected");
+      }
+
+      selectedWidget = widget;
+      widget.classList.add("is-selected");
+      renderInsertSlots(selectedWidget);
+
+      if (navigator.vibrate) {
+        try { navigator.vibrate(25); } catch(err) {}
+      }
+      showToast(`'${widgetMeta.name}' 선택됨. 이동할 위치의 [+ 여기로 이동]을 누르세요.`, "open_with");
+    });
   });
 }
 
@@ -860,7 +870,7 @@ function initNavigationAndDrawers() {
   if (closeNavBtn) closeNavBtn.addEventListener("click", () => closeModalView("nav-drawer"));
   if (navBackdrop) navBackdrop.addEventListener("click", () => closeModalView("nav-drawer"));
 
-  // 1) 🌟 햄버거 메뉴에서 '위젯 순서 변경' 클릭 시 메뉴를 닫고 편집 모드로 진입
+  // 🌟 햄버거 메뉴에서 '위젯 순서 변경' 클릭 시 메뉴를 닫고 편집 모드로 전환
   if (openWidgetReorderBtn) {
     openWidgetReorderBtn.addEventListener("click", () => {
       closeModalView("nav-drawer");
@@ -870,10 +880,10 @@ function initNavigationAndDrawers() {
     });
   }
 
-  // 2) 메인 화면 '이번 달 달력' 우측 상단 '+' 버튼 클릭 -> 연차 관리 서랍 오픈
+  // 메인 화면 '이번 달 달력' 우측 상단 '+' 버튼 클릭 -> 연차 관리 서랍 오픈
   if (mainAddLeaveBtn) mainAddLeaveBtn.addEventListener("click", openMyLeaveDrawer);
 
-  // 3) 메인 화면 '카운트다운' 우측 상단 '연필' 버튼 클릭 -> 근무 시간 설정 모달 오픈
+  // 메인 화면 '카운트다운' 우측 상단 '연필' 버튼 클릭 -> 근무 시간 설정 모달 오픈
   if (editWorkTimeBtn) {
     editWorkTimeBtn.addEventListener("click", () => {
       openProfileEditModalDirectly();
@@ -3345,7 +3355,7 @@ async function init() {
   setupSimCalendarControls();
   setupLunchEngine();
   setupSlackingEngine();
-  initWidgetOrderManager(); // 🌟 모바일 실시간 드래그 & 플레이스홀더 순서 변경 엔진 등록
+  initWidgetOrderManager(); // 🌟 위젯 터치 선택 & 슬롯 이동 엔진 등록
   initLeaveRegisterForm();
   initPasswordChangeForm();
 
