@@ -909,16 +909,34 @@ function initNavigationAndDrawers() {
 }
 
 // ==========================================
-// 7. 달력 상세 팝업 모달 (🌟 수정 & 삭제 버튼 연동)
+// 7. 달력 상세 팝업 모달 (🌟 수정, 삭제 & 연차 추가 버튼 연동)
 // ==========================================
 function initCalendarDetailModal() {
   const closeBtn = document.getElementById("btn-close-modal");
   const backdrop = document.getElementById("cal-modal-backdrop");
   const editBtn = document.getElementById("btn-edit-selected-leave");
   const deleteBtn = document.getElementById("btn-delete-selected-leave");
+  const addBtn = document.getElementById("btn-add-selected-leave");
 
   if (closeBtn) closeBtn.addEventListener("click", () => closeModalView("cal-detail-modal"));
   if (backdrop) backdrop.addEventListener("click", () => closeModalView("cal-detail-modal"));
+
+  // 🌟 미등록 날짜에서 '연차 등록하기' 클릭 시 바로 등록 모달 오픈
+  if (addBtn) {
+    addBtn.addEventListener("click", () => {
+      const targetDateKey = addBtn.dataset.leaveDate;
+      if (!targetDateKey) return;
+
+      closeModalView("cal-detail-modal");
+
+      const parts = targetDateKey.split("-").map(Number);
+      const cellDate = new Date(parts[0], parts[1] - 1, parts[2]);
+
+      setTimeout(() => {
+        openLeaveRegisterModal(cellDate, targetDateKey);
+      }, 150);
+    });
+  }
 
   // 🌟 메인 달력 상세 팝업에서 '연차 수정하기' 클릭 시 바로 수정 모달 오픈
   if (editBtn) {
@@ -960,8 +978,10 @@ function openCalendarDetailModal(cellDate, dateKey, isHoliday, isLeave, isToday,
   const weatherBox = document.getElementById("modal-weather-box");
   const weatherInfoEl = document.getElementById("modal-info-weather");
   const myLeaveActionRow = document.getElementById("modal-my-leave-action-row");
+  const addLeaveActionRow = document.getElementById("modal-add-leave-action-row");
   const editBtn = document.getElementById("btn-edit-selected-leave");
   const deleteBtn = document.getElementById("btn-delete-selected-leave");
+  const addBtn = document.getElementById("btn-add-selected-leave");
 
   const todayKey = formatDateKey(new Date());
   const dayName = ['일', '월', '화', '수', '목', '금', '토'][cellDate.getDay()];
@@ -985,13 +1005,22 @@ function openCalendarDetailModal(cellDate, dateKey, isHoliday, isLeave, isToday,
     if (nameEl) nameEl.innerText = myLeave.title;
     if (descEl) descEl.innerText = myLeave.content ? `${myLeave.content} (구분: ${myLeave.type})` : `직접 등록한 ${myLeave.type} 일정입니다.`;
 
+    // 등록된 연차가 있을 때: 수정/삭제 버튼 노출, 추가 버튼 숨김
     if (myLeaveActionRow) {
       myLeaveActionRow.style.display = "flex";
       if (editBtn) editBtn.dataset.leaveDate = dateKey;
       if (deleteBtn) deleteBtn.dataset.leaveId = myLeave.id;
     }
+    if (addLeaveActionRow) {
+      addLeaveActionRow.style.display = "none";
+    }
   } else {
+    // 등록된 연차가 없을 때: 수정/삭제 버튼 숨김, 연차 등록 버튼 노출
     if (myLeaveActionRow) myLeaveActionRow.style.display = "none";
+    if (addLeaveActionRow) {
+      addLeaveActionRow.style.display = "flex";
+      if (addBtn) addBtn.dataset.leaveDate = dateKey;
+    }
 
     if (isHoliday) {
       if (iconEl) iconEl.innerText = "celebration";
