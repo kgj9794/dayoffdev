@@ -472,12 +472,13 @@
                 <h2 id="my-leave-cal-month-year" class="title-medium">2026년 9월</h2>
               </div>
             </div>
+            <!-- 🌟 수정됨: 깨짐을 유발하던 btn-order-move를 표준 cal-nav-btn으로 교체 -->
             <div class="cal-nav-buttons">
-              <button type="button" id="my-leave-cal-prev" class="btn-order-move" title="이전 달">
-                <span class="material-symbols-outlined icon-small">chevron_left</span>
+              <button type="button" id="my-leave-cal-prev" class="cal-nav-btn" title="이전 달" aria-label="이전 달">
+                <span class="material-symbols-outlined">chevron_left</span>
               </button>
-              <button type="button" id="my-leave-cal-next" class="btn-order-move" title="다음 달">
-                <span class="material-symbols-outlined icon-small">chevron_right</span>
+              <button type="button" id="my-leave-cal-next" class="cal-nav-btn" title="다음 달" aria-label="다음 달">
+                <span class="material-symbols-outlined">chevron_right</span>
               </button>
             </div>
           </div>
@@ -1012,10 +1013,15 @@
         <p class="info-value-desc" id="modal-info-desc">대한민국 공식 공휴일입니다.</p>
       </div>
 
-      <div class="modal-info-row" id="modal-my-leave-action-row" style="display: none; margin-top: 6px;">
-        <button type="button" id="btn-delete-selected-leave" class="fb-submit-btn" style="background-color: var(--md-sys-color-error); padding: 9px 14px; font-size: 0.8125rem;">
+      <!-- 🌟 수정됨: 연차 수정하기 버튼 추가 & 연차 삭제하기로 멘트 변경 -->
+      <div class="modal-info-row" id="modal-my-leave-action-row" style="display: none; margin-top: 8px; flex-direction: column; gap: 8px;">
+        <button type="button" id="btn-edit-selected-leave" class="fb-submit-btn" style="background-color: #8b5cf6; padding: 10px 14px; font-size: 0.8125rem;">
+          <span class="material-symbols-outlined" style="font-size: 16px;">edit</span>
+          <span>연차 수정하기</span>
+        </button>
+        <button type="button" id="btn-delete-selected-leave" class="fb-submit-btn" style="background-color: var(--md-sys-color-error); padding: 10px 14px; font-size: 0.8125rem;">
           <span class="material-symbols-outlined" style="font-size: 16px;">delete</span>
-          <span>이 연차 일정 취소/삭제</span>
+          <span>연차 삭제하기</span>
         </button>
       </div>
     </div>
@@ -1140,7 +1146,7 @@
   </div>
 
   <!-- ==========================================
-       11. 개인정보 변경 전용 모달 (출퇴근 시간 설정 + 🌟 Safari 시계 아이콘 래퍼)
+       11. 개인정보 변경 전용 모달 (출퇴근 시간 설정 + Safari 시계 아이콘 래퍼)
        ========================================== -->
   <div class="modal-backdrop" id="profile-edit-modal-backdrop"></div>
   <div class="cal-detail-modal auth-modal-card" id="profile-edit-modal" role="dialog" aria-modal="true">
@@ -1159,7 +1165,7 @@
 
     <div class="modal-body">
       <form id="profile-edit-form" class="feedback-form-content">
-        <!-- 🌟 출근 시간 인풋 + 우측 시계 기호 래퍼 -->
+        <!-- 출근 시간 인풋 + 우측 시계 기호 래퍼 -->
         <div class="form-group-item">
           <label for="edit-start-work-time" class="fb-label">출근 시간</label>
           <div class="time-picker-wrapper">
@@ -1168,7 +1174,7 @@
           </div>
         </div>
 
-        <!-- 🌟 퇴근 시간 인풋 + 우측 시계 기호 래퍼 -->
+        <!-- 퇴근 시간 인풋 + 우측 시계 기호 래퍼 -->
         <div class="form-group-item">
           <label for="edit-off-work-time" class="fb-label">퇴근 시간</label>
           <div class="time-picker-wrapper">
