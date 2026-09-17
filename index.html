@@ -1008,7 +1008,7 @@
         <p class="info-value-desc" id="modal-info-desc">대한민국 공식 공휴일입니다.</p>
       </div>
 
-      <!-- 🌟 수정됨: 연차 수정하기 버튼 추가 & 연차 삭제하기로 멘트 변경 -->
+      <!-- 🌟 등록된 내 연차 전용 액션 영역 (수정 / 삭제) -->
       <div class="modal-info-row" id="modal-my-leave-action-row" style="display: none; margin-top: 8px; flex-direction: column; gap: 8px;">
         <button type="button" id="btn-edit-selected-leave" class="fb-submit-btn" style="background-color: #8b5cf6; padding: 10px 14px; font-size: 0.8125rem;">
           <span class="material-symbols-outlined" style="font-size: 16px;">edit</span>
@@ -1017,6 +1017,14 @@
         <button type="button" id="btn-delete-selected-leave" class="fb-submit-btn" style="background-color: var(--md-sys-color-error); padding: 10px 14px; font-size: 0.8125rem;">
           <span class="material-symbols-outlined" style="font-size: 16px;">delete</span>
           <span>연차 삭제하기</span>
+        </button>
+      </div>
+
+      <!-- 🌟 새로 추가됨: 미등록 빈 날짜/일반 날짜 전용 연차 등록 버튼 -->
+      <div class="modal-info-row" id="modal-add-leave-action-row" style="display: none; margin-top: 8px;">
+        <button type="button" id="btn-add-selected-leave" class="fb-submit-btn" style="background-color: #8b5cf6; padding: 10px 14px; font-size: 0.8125rem;">
+          <span class="material-symbols-outlined" style="font-size: 16px;">calendar_add_on</span>
+          <span>연차 등록하기</span>
         </button>
       </div>
     </div>
