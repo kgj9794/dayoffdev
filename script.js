@@ -399,7 +399,7 @@ function initGlobalHistoryAndEscListener() {
 }
 
 // ==========================================
-// 4. 🌟 위젯 순서 변경 엔진 (터치 선택 & 이동 슬롯 시스템)
+// 4. 위젯 순서 변경 엔진
 // ==========================================
 let isEditingWidgets = false;
 let selectedWidget = null;
@@ -530,7 +530,6 @@ function createSlotElement(insertCallback) {
   return slot;
 }
 
-// 🌟 선택된 위젯을 이동할 수 있는 사이사이 슬롯 생성
 function renderInsertSlots(targetWidget) {
   clearInsertSlots();
   if (!targetWidget) return;
@@ -551,7 +550,6 @@ function renderInsertSlots(targetWidget) {
 
     widgets.forEach((w, idx) => {
       const prevWidget = idx > 0 ? widgets[idx - 1] : null;
-      // 선택된 위젯의 바로 앞뒤 위치는 이동이 무의미하므로 제외
       const isRedundantBefore = (w === targetWidget) || (prevWidget === targetWidget);
 
       if (!isRedundantBefore) {
@@ -559,7 +557,6 @@ function renderInsertSlots(targetWidget) {
         col.insertBefore(slotBefore, w);
       }
 
-      // 칼럼의 마지막 위젯 뒤 슬롯
       if (idx === widgets.length - 1 && w !== targetWidget) {
         const slotAfter = createSlotElement(() => col.appendChild(targetWidget));
         col.appendChild(slotAfter);
@@ -616,7 +613,6 @@ function initWidgetOrderManager() {
     });
   }
 
-  // 편집 모드일 때 빈 배경 클릭 시 완료 처리
   document.addEventListener("click", (e) => {
     if (isEditingWidgets && 
         !e.target.closest(".dashboard-widget") && 
@@ -635,7 +631,6 @@ function initWidgetOrderManager() {
       if (isEditingWidgets) e.preventDefault();
     });
 
-    // 🌟 위젯 터치 선택 핸들러 (모바일 스크롤 충돌 없이 깔끔하게 동작)
     widget.addEventListener("click", (e) => {
       if (!isEditingWidgets) return;
 
@@ -644,7 +639,6 @@ function initWidgetOrderManager() {
 
       const widgetMeta = WIDGET_META[widget.dataset.widgetId] || { name: "위젯" };
 
-      // 이미 선택된 위젯을 다시 누른 경우: 선택 해제
       if (selectedWidget === widget) {
         widget.classList.remove("is-selected");
         selectedWidget = null;
@@ -653,7 +647,6 @@ function initWidgetOrderManager() {
         return;
       }
 
-      // 다른 위젯이 이미 선택되어 있었다면 해제
       if (selectedWidget) {
         selectedWidget.classList.remove("is-selected");
       }
@@ -693,7 +686,6 @@ function getOffWorkTime() {
   };
 }
 
-// 카운트다운 위젯 내 출퇴근 시간 텍스트 배지 실시간 갱신
 function updateWorkTimeDisplay() {
   const textEl = document.getElementById("countdown-work-time-text");
   if (textEl) {
@@ -703,7 +695,6 @@ function updateWorkTimeDisplay() {
   }
 }
 
-// 로그인 사용자의 출퇴근 시간 설정을 구글 시트 DB로 비동기 저장
 async function syncWorkTimeToServer() {
   const user = getCurrentUser();
   if (!user) return;
@@ -726,7 +717,6 @@ async function syncWorkTimeToServer() {
   }
 }
 
-// 개인정보 변경 모달 즉시 열기
 function openProfileEditModalDirectly() {
   const user = getCurrentUser();
   if (!user) {
@@ -835,8 +825,8 @@ function initNavigationAndDrawers() {
   const closeNavBtn = document.getElementById("btn-close-nav-menu");
   const navBackdrop = document.getElementById("nav-drawer-backdrop");
 
-  const mainAddLeaveBtn = document.getElementById("btn-main-add-leave"); // 메인 화면 달력 '+' 버튼
-  const editWorkTimeBtn = document.getElementById("btn-edit-work-time"); // 카운트다운 연필 버튼
+  const mainAddLeaveBtn = document.getElementById("btn-main-add-leave");
+  const editWorkTimeBtn = document.getElementById("btn-edit-work-time");
   const closeMyLeaveBtn = document.getElementById("btn-close-my-leave");
   const myLeaveBackdrop = document.getElementById("my-leave-drawer-backdrop");
 
@@ -852,7 +842,6 @@ function initNavigationAndDrawers() {
   const closeSlackingBtn = document.getElementById("btn-close-slacking");
   const slackingBackdrop = document.getElementById("slacking-drawer-backdrop");
 
-  // 🌟 햄버거 메뉴 내 '위젯 순서 변경' 메뉴 버튼
   const openWidgetReorderBtn = document.getElementById("menu-open-widget-reorder");
 
   if (openNavBtn) {
@@ -870,7 +859,6 @@ function initNavigationAndDrawers() {
   if (closeNavBtn) closeNavBtn.addEventListener("click", () => closeModalView("nav-drawer"));
   if (navBackdrop) navBackdrop.addEventListener("click", () => closeModalView("nav-drawer"));
 
-  // 🌟 햄버거 메뉴에서 '위젯 순서 변경' 클릭 시 메뉴를 닫고 편집 모드로 전환
   if (openWidgetReorderBtn) {
     openWidgetReorderBtn.addEventListener("click", () => {
       closeModalView("nav-drawer");
@@ -880,10 +868,8 @@ function initNavigationAndDrawers() {
     });
   }
 
-  // 메인 화면 '이번 달 달력' 우측 상단 '+' 버튼 클릭 -> 연차 관리 서랍 오픈
   if (mainAddLeaveBtn) mainAddLeaveBtn.addEventListener("click", openMyLeaveDrawer);
 
-  // 메인 화면 '카운트다운' 우측 상단 '연필' 버튼 클릭 -> 근무 시간 설정 모달 오픈
   if (editWorkTimeBtn) {
     editWorkTimeBtn.addEventListener("click", () => {
       openProfileEditModalDirectly();
@@ -923,22 +909,41 @@ function initNavigationAndDrawers() {
 }
 
 // ==========================================
-// 7. 달력 상세 팝업 모달
+// 7. 달력 상세 팝업 모달 (🌟 수정 & 삭제 버튼 연동)
 // ==========================================
 function initCalendarDetailModal() {
   const closeBtn = document.getElementById("btn-close-modal");
   const backdrop = document.getElementById("cal-modal-backdrop");
+  const editBtn = document.getElementById("btn-edit-selected-leave");
   const deleteBtn = document.getElementById("btn-delete-selected-leave");
 
   if (closeBtn) closeBtn.addEventListener("click", () => closeModalView("cal-detail-modal"));
   if (backdrop) backdrop.addEventListener("click", () => closeModalView("cal-detail-modal"));
 
+  // 🌟 메인 달력 상세 팝업에서 '연차 수정하기' 클릭 시 바로 수정 모달 오픈
+  if (editBtn) {
+    editBtn.addEventListener("click", () => {
+      const targetDateKey = editBtn.dataset.leaveDate;
+      if (!targetDateKey) return;
+
+      closeModalView("cal-detail-modal");
+
+      const parts = targetDateKey.split("-").map(Number);
+      const cellDate = new Date(parts[0], parts[1] - 1, parts[2]);
+
+      setTimeout(() => {
+        openLeaveRegisterModal(cellDate, targetDateKey);
+      }, 150);
+    });
+  }
+
+  // 🌟 메인 달력 상세 팝업에서 '연차 삭제하기' 클릭
   if (deleteBtn) {
     deleteBtn.addEventListener("click", async () => {
       const leaveId = deleteBtn.dataset.leaveId;
       if (!leaveId) return;
 
-      if (confirm("이 연차 일정을 삭제(취소)하시겠습니까?")) {
+      if (confirm("이 연차 일정을 삭제하시겠습니까?")) {
         await executeDeleteUserLeave(leaveId);
         closeModalView("cal-detail-modal");
       }
@@ -955,6 +960,7 @@ function openCalendarDetailModal(cellDate, dateKey, isHoliday, isLeave, isToday,
   const weatherBox = document.getElementById("modal-weather-box");
   const weatherInfoEl = document.getElementById("modal-info-weather");
   const myLeaveActionRow = document.getElementById("modal-my-leave-action-row");
+  const editBtn = document.getElementById("btn-edit-selected-leave");
   const deleteBtn = document.getElementById("btn-delete-selected-leave");
 
   const todayKey = formatDateKey(new Date());
@@ -979,9 +985,10 @@ function openCalendarDetailModal(cellDate, dateKey, isHoliday, isLeave, isToday,
     if (nameEl) nameEl.innerText = myLeave.title;
     if (descEl) descEl.innerText = myLeave.content ? `${myLeave.content} (구분: ${myLeave.type})` : `직접 등록한 ${myLeave.type} 일정입니다.`;
 
-    if (myLeaveActionRow && deleteBtn) {
+    if (myLeaveActionRow) {
       myLeaveActionRow.style.display = "flex";
-      deleteBtn.dataset.leaveId = myLeave.id;
+      if (editBtn) editBtn.dataset.leaveDate = dateKey;
+      if (deleteBtn) deleteBtn.dataset.leaveId = myLeave.id;
     }
   } else {
     if (myLeaveActionRow) myLeaveActionRow.style.display = "none";
@@ -1265,7 +1272,6 @@ function initAuthSystem() {
   }
 
   document.addEventListener("click", (e) => {
-    // 1) 개인정보 변경 버튼 터치 감지
     const editProfileBtn = e.target.closest("#btn-popup-edit-profile");
     if (editProfileBtn) {
       e.preventDefault();
@@ -1275,7 +1281,6 @@ function initAuthSystem() {
       return;
     }
 
-    // 2) 비밀번호 변경 버튼 터치 감지
     const changePwBtn = e.target.closest("#btn-popup-change-pw");
     if (changePwBtn) {
       e.preventDefault();
@@ -1287,7 +1292,6 @@ function initAuthSystem() {
       return;
     }
 
-    // 3) 로그아웃 버튼 터치 감지
     const logoutBtn = e.target.closest("#btn-popup-logout");
     if (logoutBtn) {
       e.preventDefault();
@@ -1299,7 +1303,6 @@ function initAuthSystem() {
       return;
     }
 
-    // 4) 프로필 팝업 바깥 터치 시 닫기
     const popup = document.getElementById("profile-popup");
     const backdrop = document.getElementById("profile-popup-backdrop");
     if (popup && popup.classList.contains("is-open")) {
@@ -1360,7 +1363,6 @@ function initAuthSystem() {
     });
   }
 
-  // 로그인 제출
   if (loginForm) {
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -1389,7 +1391,6 @@ function initAuthSystem() {
           localStorage.setItem("app_user_login_time", Date.now().toString());
           localStorage.removeItem("app_is_guest");
 
-          // 사용자별 출퇴근 시간 DB에서 동기화
           if (result.user.startWorkTime) {
             localStorage.setItem("app_start_work_time", result.user.startWorkTime);
           }
@@ -1419,7 +1420,6 @@ function initAuthSystem() {
     });
   }
 
-  // 회원가입 제출
   if (signupForm) {
     signupForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -1503,7 +1503,6 @@ function handleLogout(isSilent = false) {
   }
 }
 
-// 비밀번호 변경 폼 처리
 function initPasswordChangeForm() {
   const form = document.getElementById("pw-change-form");
   const closeBtn = document.getElementById("btn-close-pw-change");
@@ -1590,7 +1589,7 @@ function initPasswordChangeForm() {
 }
 
 // ==========================================
-// 10. 내 연차 관리 엔진 (로드/추가/삭제 및 캘린더 동기화)
+// 10. 내 연차 관리 엔진 (로드/추가/수정/삭제 및 캘린더 동기화)
 // ==========================================
 async function loadUserLeaves(userId) {
   if (!userId) return;
@@ -1668,6 +1667,7 @@ function renderMyLeaveCalendar(direction = "none") {
   }
 }
 
+// 🌟 등록된 연차 리스트 렌더링 (수정 버튼 & 삭제 버튼 그룹화)
 function renderMyLeaveRegisteredList() {
   const listEl = document.getElementById("my-leave-registered-list");
   const countDescEl = document.getElementById("my-leave-count-desc");
@@ -1717,13 +1717,31 @@ function renderMyLeaveRegisteredList() {
           <strong class="my-leave-title">${item.title}</strong>
           ${item.content ? `<p class="my-leave-desc">${item.content}</p>` : ''}
         </div>
-        <button type="button" class="btn-delete-leave" data-leave-id="${item.id}" title="연차 삭제">
-          <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
-        </button>
+        <div class="my-leave-actions">
+          <button type="button" class="btn-edit-leave" data-leave-date="${cleanDate}" title="연차 수정">
+            <span class="material-symbols-outlined" style="font-size: 18px;">edit</span>
+          </button>
+          <button type="button" class="btn-delete-leave" data-leave-id="${item.id}" title="연차 삭제">
+            <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
+          </button>
+        </div>
       </div>
     `;
   }).join("");
 
+  // 🌟 연차 수정 버튼 클릭 이벤트 연동
+  listEl.querySelectorAll(".btn-edit-leave").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const dateStr = btn.dataset.leaveDate;
+      if (!dateStr) return;
+
+      const parts = dateStr.split("-").map(Number);
+      const cellDate = new Date(parts[0], parts[1] - 1, parts[2]);
+      openLeaveRegisterModal(cellDate, dateStr);
+    });
+  });
+
+  // 연차 삭제 버튼 클릭 이벤트 연동
   listEl.querySelectorAll(".btn-delete-leave").forEach(btn => {
     btn.addEventListener("click", async () => {
       const leaveId = btn.dataset.leaveId;
@@ -3355,7 +3373,7 @@ async function init() {
   setupSimCalendarControls();
   setupLunchEngine();
   setupSlackingEngine();
-  initWidgetOrderManager(); // 🌟 위젯 터치 선택 & 슬롯 이동 엔진 등록
+  initWidgetOrderManager();
   initLeaveRegisterForm();
   initPasswordChangeForm();
 
