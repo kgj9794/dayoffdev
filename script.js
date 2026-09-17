@@ -1133,7 +1133,7 @@ function checkSessionExpiration() {
       userLeavesMap.clear();
       userLeavesList = [];
       closeProfilePopup();
-      alert("로그인 후 24시간이 경과하여 보안을 위해 자동으로 로그아웃되었습니다.");
+      alert("세션이 만료되었습니다..");
       updateAuthUI();
       refreshAllCalendars();
       return true;
