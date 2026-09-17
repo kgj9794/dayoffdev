@@ -1803,7 +1803,6 @@ function openLeaveRegisterModal(cellDate, dateKey) {
   const submitBtn = document.getElementById("btn-leave-reg-submit");
   const submitBtnText = document.getElementById("leave-reg-btn-text");
   const submitBtnIcon = document.getElementById("leave-reg-btn-icon");
-  const deleteBtn = document.getElementById("btn-leave-reg-delete");
 
   const dayName = ['일', '월', '화', '수', '목', '금', '토'][cellDate.getDay()];
   if (dateInput) dateInput.value = cleanDateKey;
@@ -1820,11 +1819,6 @@ function openLeaveRegisterModal(cellDate, dateKey) {
     if (modalIcon) modalIcon.innerText = "edit_calendar";
     if (submitBtnText) submitBtnText.innerText = "연차 수정하기";
     if (submitBtnIcon) submitBtnIcon.innerText = "edit";
-
-    if (deleteBtn) {
-      deleteBtn.style.display = "inline-flex";
-      deleteBtn.dataset.leaveId = existing.id;
-    }
   } else {
     if (leaveIdInput) leaveIdInput.value = "";
     if (typeSelect) typeSelect.value = "연차";
@@ -1835,11 +1829,6 @@ function openLeaveRegisterModal(cellDate, dateKey) {
     if (modalIcon) modalIcon.innerText = "calendar_add_on";
     if (submitBtnText) submitBtnText.innerText = "연차 등록하기";
     if (submitBtnIcon) submitBtnIcon.innerText = "check_circle";
-
-    if (deleteBtn) {
-      deleteBtn.style.display = "none";
-      deleteBtn.dataset.leaveId = "";
-    }
   }
 
   openModalView("leave-reg-modal", "leave-reg-modal-backdrop");
@@ -1851,7 +1840,6 @@ function initLeaveRegisterForm() {
   const backdrop = document.getElementById("leave-reg-modal-backdrop");
   const submitBtn = document.getElementById("btn-leave-reg-submit");
   const btnText = document.getElementById("leave-reg-btn-text");
-  const deleteBtn = document.getElementById("btn-leave-reg-delete");
 
   const prevBtn = document.getElementById("my-leave-cal-prev");
   const nextBtn = document.getElementById("my-leave-cal-next");
@@ -1882,20 +1870,6 @@ function initLeaveRegisterForm() {
 
   if (closeBtn) closeBtn.addEventListener("click", () => closeModalView("leave-reg-modal"));
   if (backdrop) backdrop.addEventListener("click", () => closeModalView("leave-reg-modal"));
-
-  if (deleteBtn) {
-    deleteBtn.addEventListener("click", async () => {
-      const leaveId = deleteBtn.dataset.leaveId;
-      if (!leaveId) return;
-
-      if (confirm("정말 이 연차 일정을 삭제하시겠습니까?")) {
-        deleteBtn.disabled = true;
-        await executeDeleteUserLeave(leaveId);
-        deleteBtn.disabled = false;
-        closeModalView("leave-reg-modal");
-      }
-    });
-  }
 
   if (form) {
     form.addEventListener("submit", async (e) => {
