@@ -1009,7 +1009,7 @@ body.is-loading {
 }
 
 /* ==========================================
-   6. 캘린더 그리드, 팁 배너
+   6. 캘린더 그리드, 팁 배너 & 네비게이션 버튼
    ========================================== */
 .cal-nav-bar {
   display: flex;
@@ -1031,8 +1031,37 @@ body.is-loading {
 
 .cal-nav-buttons {
   display: flex;
+  align-items: center;
   gap: 6px;
-  margin-top: 4px;
+}
+
+/* 🌟 이전/다음 달 버튼 스타일 복구 및 표준화 */
+.cal-nav-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--md-shape-corner-full);
+  border: 1.5px solid var(--card-border-color);
+  background-color: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  box-shadow: var(--md-elevation-1);
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.cal-nav-btn:hover {
+  background-color: var(--md-sys-color-primary-container);
+  border-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary-container);
+  transform: translateY(-1px) scale(1.05);
+}
+
+.cal-nav-btn .material-symbols-outlined {
+  font-size: 20px;
 }
 
 /* 메인 화면 캘린더(+) 액션 버튼 */
@@ -1519,6 +1548,43 @@ body.is-loading {
 .my-leave-desc {
   font-size: 0.75rem;
   color: var(--md-sys-color-outline);
+}
+
+/* 🌟 내 연차 목록 우측 수정 & 삭제 버튼 그룹 */
+.my-leave-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.btn-edit-leave {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--md-shape-corner-small);
+  border: 1px solid var(--card-border-color);
+  background: transparent;
+  color: #8b5cf6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.btn-edit-leave:hover {
+  background-color: #f3e8ff;
+  border-color: #8b5cf6;
+}
+
+[data-theme="dark"] .btn-edit-leave {
+  color: #c084fc;
+}
+
+[data-theme="dark"] .btn-edit-leave:hover {
+  background-color: #3b0764;
+  border-color: #a855f7;
 }
 
 .btn-delete-leave {
@@ -2734,7 +2800,7 @@ body.is-editing-widgets .dashboard-widget.is-selected::before {
   display: block;
 }
 
-/* 🌟 Safari/Chrome 공통 출퇴근 시간 시계 아이콘 래퍼 */
+/* Safari/Chrome 공통 출퇴근 시간 시계 아이콘 래퍼 */
 .time-picker-wrapper {
   position: relative;
   display: flex;
